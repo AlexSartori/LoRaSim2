@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import lorasim2.LoRaNode;
@@ -21,11 +22,11 @@ import lorasim2.LoRaNode;
 public class CanvasPanel extends JPanel implements MouseListener {
     private final int NODE_IMG_SIZE = 70;
     
-    private enum StateEnum { NONE, ADDING_NODE };
+    private enum StateEnum { NONE, ADDING_NODE, EDITING_NODE };
     private StateEnum state;
     private BufferedImage img_lora_node;
 
-    private final HashMap<Point, LoRaNode> gui_nodes;
+    private final HashMap<LoRaNode, Point> gui_nodes;
     
     public CanvasPanel() {
         super();
@@ -47,7 +48,7 @@ public class CanvasPanel extends JPanel implements MouseListener {
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         
-        gui_nodes.keySet().forEach(p -> {
+        gui_nodes.values().forEach(p -> {
             g2.drawImage(
                     img_lora_node,
                     (int)p.getX() - NODE_IMG_SIZE/2,
@@ -63,15 +64,27 @@ public class CanvasPanel extends JPanel implements MouseListener {
         this.state = StateEnum.ADDING_NODE;
         this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
     }
+    
+    public void beginEditNode() {
+        this.state = StateEnum.EDITING_NODE;
+        this.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
 
     @Override
     public void mouseClicked(MouseEvent me) {
         if (state == StateEnum.ADDING_NODE) {
             state = StateEnum.NONE;
             this.setCursor(Cursor.getDefaultCursor());
-            this.gui_nodes.put(me.getPoint(), null);
+            this.gui_nodes.put(new LoRaNode(), me.getPoint());
             this.repaint();
-        }
+        } else if (state == StateEnum.EDITING_NODE) {
+            state = StateEnum.NONE;
+            this.setCursor(Cursor.getDefaultCursor());
+            
+            LoRaNode node = getClosestNodeToPoint(me.getPoint());
+            System.out.println("Editing node: " + node.toString());
+            new EditNodeDialog().setVisible(true);
+       }
     }
 
     @Override
@@ -85,4 +98,20 @@ public class CanvasPanel extends JPanel implements MouseListener {
 
     @Override
     public void mouseExited(MouseEvent me) {}
+    
+    private LoRaNode getClosestNodeToPoint(Point p) {
+        LoRaNode closest_node = null;
+        double closest_dist = -1, tmp_dist;
+        
+        for (Entry<LoRaNode, Point> e : gui_nodes.entrySet()) {
+            tmp_dist = e.getValue().distance(p);
+            
+            if (closest_dist == -1 || tmp_dist < closest_dist) {
+                closest_dist = tmp_dist;
+                closest_node = e.getKey();
+            }
+        }
+        
+        return closest_dist <= NODE_IMG_SIZE/2 ? closest_node : null;
+    }
 }

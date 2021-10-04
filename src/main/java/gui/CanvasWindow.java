@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -63,6 +62,7 @@ public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
                 canvas.beginAddNode();
                 break;
             case "Edit Node":
+                canvas.beginEditNode();
                 break;
             case "Delete Node":
                 break;
