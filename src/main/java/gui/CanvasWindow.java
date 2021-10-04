@@ -65,6 +65,7 @@ public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
                 canvas.beginEditNode();
                 break;
             case "Delete Node":
+                canvas.beginDelNode();
                 break;
             default:
                 System.err.println("Unexpected action command in CanvasWindow listener: " + cmd);

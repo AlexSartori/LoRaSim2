@@ -22,7 +22,7 @@ import lorasim2.LoRaNode;
 public class CanvasPanel extends JPanel implements MouseListener {
     private final int NODE_IMG_SIZE = 70;
     
-    private enum StateEnum { NONE, ADDING_NODE, EDITING_NODE };
+    private enum StateEnum { NONE, ADDING_NODE, EDITING_NODE, DELETING_NODE };
     private StateEnum state;
     private BufferedImage img_lora_node;
 
@@ -48,6 +48,8 @@ public class CanvasPanel extends JPanel implements MouseListener {
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         
+        g2.clearRect(0, 0, getWidth(), getHeight());
+        
         gui_nodes.values().forEach(p -> {
             g2.drawImage(
                     img_lora_node,
@@ -69,22 +71,41 @@ public class CanvasPanel extends JPanel implements MouseListener {
         this.state = StateEnum.EDITING_NODE;
         this.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
+    
+    public void beginDelNode() {
+        this.state = StateEnum.DELETING_NODE;
+        this.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
 
     @Override
     public void mouseClicked(MouseEvent me) {
-        if (state == StateEnum.ADDING_NODE) {
-            state = StateEnum.NONE;
-            this.setCursor(Cursor.getDefaultCursor());
-            this.gui_nodes.put(new LoRaNode(), me.getPoint());
-            this.repaint();
-        } else if (state == StateEnum.EDITING_NODE) {
-            state = StateEnum.NONE;
-            this.setCursor(Cursor.getDefaultCursor());
-            
-            LoRaNode node = getClosestNodeToPoint(me.getPoint());
-            System.out.println("Editing node: " + node.toString());
-            new EditNodeDialog().setVisible(true);
-       }
+        switch (state) {
+            case ADDING_NODE:
+                state = StateEnum.NONE;
+                this.setCursor(Cursor.getDefaultCursor());
+                this.gui_nodes.put(new LoRaNode(), me.getPoint());
+                this.repaint();
+                break;
+            case EDITING_NODE:{
+                state = StateEnum.NONE;
+                this.setCursor(Cursor.getDefaultCursor());
+                LoRaNode node = getClosestNodeToPoint(me.getPoint());
+                System.out.println("Editing node: " + node.toString());
+                new EditNodeDialog().setVisible(true);
+                break;
+                }
+            case DELETING_NODE:{
+                state = StateEnum.NONE;
+                this.setCursor(Cursor.getDefaultCursor());
+                LoRaNode node = getClosestNodeToPoint(me.getPoint());
+                if (node != null)
+                    gui_nodes.remove(node);
+                this.repaint();
+                break;
+                }
+            default:
+                break;
+        }
     }
 
     @Override
