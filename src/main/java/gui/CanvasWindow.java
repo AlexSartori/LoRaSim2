@@ -16,6 +16,7 @@ import javax.swing.JToolBar;
 public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
     private JToolBar toolbar;
     private CanvasPanel canvas;
+    private ResultsPanel res_panel;
     
     public CanvasWindow() {
         super();
@@ -51,6 +52,10 @@ public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
         /* Canvas ----------------------------------------------------------- */
         canvas = new CanvasPanel();
         this.add(canvas, BorderLayout.CENTER);
+        
+        /* Results Panel ---------------------------------------------------- */
+        res_panel = new ResultsPanel();
+        this.add(res_panel, BorderLayout.EAST);
     }
 
     @Override

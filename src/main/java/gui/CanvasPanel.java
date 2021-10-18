@@ -52,12 +52,12 @@ public class CanvasPanel extends JPanel implements MouseListener {
         
         gui_nodes.values().forEach(p -> {
             g2.drawImage(
-                    img_lora_node,
-                    (int)p.getX() - NODE_IMG_SIZE/2,
-                    (int)p.getY() - NODE_IMG_SIZE/2,
-                    NODE_IMG_SIZE,
-                    NODE_IMG_SIZE,
-                    this
+                img_lora_node,
+                (int)p.getX() - NODE_IMG_SIZE/2,
+                (int)p.getY() - NODE_IMG_SIZE/2,
+                NODE_IMG_SIZE,
+                NODE_IMG_SIZE,
+                this
             );
         });
     }
