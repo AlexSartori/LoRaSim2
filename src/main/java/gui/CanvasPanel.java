@@ -1,5 +1,7 @@
 package gui;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -9,10 +11,12 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+import lorasim2.LoRaMarkovModel;
 import lorasim2.LoRaNode;
 
 /**
@@ -47,8 +51,21 @@ public class CanvasPanel extends JPanel implements MouseListener {
     @Override
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        
         g2.clearRect(0, 0, getWidth(), getHeight());
+        
+        Object[] nodes = gui_nodes.keySet().toArray();
+        g2.setStroke(
+            new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL, 0, new float[]{10}, 0)
+        );
+        g2.setColor(Color.GRAY);
+        
+        for (int i = 0; i < nodes.length; i++) {
+            for (int j = i; j < nodes.length; j++) {
+                Point p1 = gui_nodes.get(nodes[i]),
+                      p2 = gui_nodes.get(nodes[j]);
+                g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
+            }
+        }
         
         gui_nodes.values().forEach(p -> {
             g2.drawImage(
@@ -83,7 +100,7 @@ public class CanvasPanel extends JPanel implements MouseListener {
             case ADDING_NODE:
                 state = StateEnum.NONE;
                 this.setCursor(Cursor.getDefaultCursor());
-                this.gui_nodes.put(new LoRaNode(), me.getPoint());
+                this.gui_nodes.put(new LoRaNode(new LoRaMarkovModel()), me.getPoint());
                 this.repaint();
                 break;
             case EDITING_NODE:{
