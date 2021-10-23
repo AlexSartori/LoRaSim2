@@ -17,10 +17,10 @@ public class LoRaSim2 {
         
         Simulator sim = new Simulator();
         sim.addNode(
-            new LoRaNode(0, new LoRaMarkovModel())
+            new LoRaNode(new LoRaMarkovModel())
         );
         sim.addNode(
-            new LoRaNode(1, new LoRaMarkovModel())
+            new LoRaNode(new LoRaMarkovModel())
         );
         sim.runSimulation();
     }
