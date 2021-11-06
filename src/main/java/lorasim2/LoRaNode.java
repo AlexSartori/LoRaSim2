@@ -1,7 +1,6 @@
 package lorasim2;
 
 /**
- *
  * @author alex
  */
 public class LoRaNode {
@@ -12,5 +11,10 @@ public class LoRaNode {
     public LoRaNode(LoRaMarkovModel model) {
         this.id = LoRaNode._global_id_counter++;
         this.model = model;
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.id;
     }
 }

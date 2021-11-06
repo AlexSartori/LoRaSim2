@@ -64,7 +64,7 @@ public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
                 for (int i = 0; i < sim_config.getNumOfNodes(); i++)
                     canvas.addRandomNode();
                 for (int i = 0; i < sim_config.getNumOfGateways(); i++)
-                    canvas.addRandomNode();
+                    canvas.addRandomGateway();
                 
                 break;
             default:
