@@ -10,17 +10,18 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
 /**
- *
  * @author alex
  */
 public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
     private JToolBar toolbar;
     private CanvasPanel canvas;
     private ResultsPanel res_panel;
+    private SimConfigDialog sim_config;
     
     public CanvasWindow() {
         super();
         this.initUI();
+        sim_config = new SimConfigDialog(this);
     }
     
     private void initUI() {
@@ -30,23 +31,14 @@ public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
         this.setLayout(new BorderLayout());
         
         /* Toolbar ---------------------------------------------------------- */
+        JButton tb_newsim = new JButton("Configure Simulation");
+        tb_newsim.addActionListener(this);
+        
         JPanel tb_panel = new JPanel(new FlowLayout());
-        
-        JButton tb_add = new JButton("Add Node");
-        JButton tb_edit = new JButton("Edit Node");
-        JButton tb_del = new JButton("Delete Node");
-        
-        tb_add.addActionListener(this);
-        tb_edit.addActionListener(this);
-        tb_del.addActionListener(this);
-        
-        tb_panel.add(tb_add);
-        tb_panel.add(tb_edit);
-        tb_panel.add(tb_del);
+        tb_panel.add(tb_newsim);
         
         toolbar = new JToolBar();
         toolbar.add(tb_panel);
-        
         this.add(toolbar, BorderLayout.NORTH);
         
         /* Canvas ----------------------------------------------------------- */
@@ -63,14 +55,17 @@ public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
         String cmd = ae.getActionCommand();
         
         switch (cmd) {
-            case "Add Node":
-                canvas.beginAddNode();
+            case "Configure Simulation":
+                sim_config.setVisible(true);
                 break;
-            case "Edit Node":
-                canvas.beginEditNode();
-                break;
-            case "Delete Node":
-                canvas.beginDelNode();
+            case "conf-sim-ok":
+                canvas.clearAll();
+                
+                for (int i = 0; i < sim_config.getNumOfNodes(); i++)
+                    canvas.addRandomNode();
+                for (int i = 0; i < sim_config.getNumOfGateways(); i++)
+                    canvas.addRandomNode();
+                
                 break;
             default:
                 System.err.println("Unexpected action command in CanvasWindow listener: " + cmd);

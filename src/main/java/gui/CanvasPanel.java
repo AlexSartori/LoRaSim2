@@ -2,18 +2,15 @@ package gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import lorasim2.LoRaMarkovModel;
@@ -23,19 +20,16 @@ import lorasim2.LoRaNode;
  *
  * @author alex
  */
-public class CanvasPanel extends JPanel implements MouseListener {
+public class CanvasPanel extends JPanel {
     private final int NODE_IMG_SIZE = 70;
+    private final Random rng = new Random();
     
-    private enum StateEnum { NONE, ADDING_NODE, EDITING_NODE, DELETING_NODE };
-    private StateEnum state;
     private BufferedImage img_lora_node;
 
     private final HashMap<LoRaNode, Point> gui_nodes;
     
     public CanvasPanel() {
         super();
-        this.state = StateEnum.NONE;
-        this.addMouseListener(this);
         this.gui_nodes = new HashMap<>();
         
         this.img_lora_node = null;
@@ -53,12 +47,14 @@ public class CanvasPanel extends JPanel implements MouseListener {
         Graphics2D g2 = (Graphics2D) g;
         g2.clearRect(0, 0, getWidth(), getHeight());
         
+        /* Set gray dashed stroke for node links */
         Object[] nodes = gui_nodes.keySet().toArray();
         g2.setStroke(
             new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL, 0, new float[]{10}, 0)
         );
         g2.setColor(Color.GRAY);
         
+        /* Draw links */
         for (int i = 0; i < nodes.length; i++) {
             for (int j = i; j < nodes.length; j++) {
                 Point p1 = gui_nodes.get(nodes[i]),
@@ -67,6 +63,7 @@ public class CanvasPanel extends JPanel implements MouseListener {
             }
         }
         
+        /* Draw nodes */
         gui_nodes.values().forEach(p -> {
             g2.drawImage(
                 img_lora_node,
@@ -79,65 +76,22 @@ public class CanvasPanel extends JPanel implements MouseListener {
         });
     }
     
-    public void beginAddNode() {
-        this.state = StateEnum.ADDING_NODE;
-        this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+    public void clearAll() {
+        gui_nodes.clear();
+        this.repaint();
     }
     
-    public void beginEditNode() {
-        this.state = StateEnum.EDITING_NODE;
-        this.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    public void addRandomNode() {
+        Point p = new Point(
+            NODE_IMG_SIZE + rng.nextInt(this.getWidth() - NODE_IMG_SIZE*2),
+            NODE_IMG_SIZE + rng.nextInt(this.getHeight() - NODE_IMG_SIZE*2)
+        );
+        gui_nodes.put(new LoRaNode(new LoRaMarkovModel()), p);
+        
+        this.repaint();
     }
     
-    public void beginDelNode() {
-        this.state = StateEnum.DELETING_NODE;
-        this.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent me) {
-        switch (state) {
-            case ADDING_NODE:
-                state = StateEnum.NONE;
-                this.setCursor(Cursor.getDefaultCursor());
-                this.gui_nodes.put(new LoRaNode(new LoRaMarkovModel()), me.getPoint());
-                this.repaint();
-                break;
-            case EDITING_NODE:{
-                state = StateEnum.NONE;
-                this.setCursor(Cursor.getDefaultCursor());
-                LoRaNode node = getClosestNodeToPoint(me.getPoint());
-                System.out.println("Editing node: " + node.toString());
-                new EditNodeDialog().setVisible(true);
-                break;
-                }
-            case DELETING_NODE:{
-                state = StateEnum.NONE;
-                this.setCursor(Cursor.getDefaultCursor());
-                LoRaNode node = getClosestNodeToPoint(me.getPoint());
-                if (node != null)
-                    gui_nodes.remove(node);
-                this.repaint();
-                break;
-                }
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent me) {}
-
-    @Override
-    public void mouseReleased(MouseEvent me) {}
-
-    @Override
-    public void mouseEntered(MouseEvent me) {}
-
-    @Override
-    public void mouseExited(MouseEvent me) {}
-    
-    private LoRaNode getClosestNodeToPoint(Point p) {
+    /*private LoRaNode getClosestNodeToPoint(Point p) {
         LoRaNode closest_node = null;
         double closest_dist = -1, tmp_dist;
         
@@ -151,5 +105,5 @@ public class CanvasPanel extends JPanel implements MouseListener {
         }
         
         return closest_dist <= NODE_IMG_SIZE/2 ? closest_node : null;
-    }
+    }*/
 }
