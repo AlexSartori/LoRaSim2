@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+
 def markov_chain(data, dr):
     print("Training Markov Chain for dr = {:}".format(dr))
     P = [
@@ -45,7 +46,11 @@ def markov_chain(data, dr):
     print("######################################################")
 
     print("Creating .ini model...")
-    with open(sys.argv[1] + "_DR" + str(dr) + ".ini", 'w') as file:
+    folder = sys.argv[1].split('.')
+    #print(folder)                  # Careful when moving data around, this may help
+    folder = folder[2].split('/')
+    #print(folder)
+    with open("./files/" + folder[3] + "_DR" + str(dr) + ".ini", 'w') as file:
         file.write('title=\n')
         file.write('description=\n')
         file.write('p00={:.03f}\n'.format(P[0][0]))
@@ -92,23 +97,30 @@ def divide(data, dr):
     partition = data.iloc[bottom:upper]
     return partition
 
+
+def main():
+    file = open(sys.argv[1], 'r')
+    procData = {}
+    data = pd.read_csv(file)
+    no_dr = [True]*7
+
+    for dr in range(7):
+        part = []
+        part = divide(data, dr)
+        if (part.empty):
+            no_dr[dr] = False
+            print(">>>>>>>>>> No more data from", dr, "on.")
+        else:
+            procData['DR' + str(dr)] = markov_chain(part, dr)
+
+    # Print the results
+    for i in range(7):
+        if (no_dr[i]):
+            print(f"DR{i}:", procData['DR' + str(i)])
+
+
 #########################  FUNCTIONS ABOVE  #########################
 
-file = open(sys.argv[1], 'r')
-procData = {}
-data = pd.read_csv(file)
-no_dr = [True]*7
 
-for dr in range(7):
-    part = []
-    part = divide(data, dr)
-    if (part.empty):
-        no_dr[dr] = False
-        print(">>>>>>>>>> No more data from", dr, "on.")
-    else:
-        procData['DR' + str(dr)] = markov_chain(part, dr)
-
-# Print the results
-for i in range(7):
-    if (no_dr[i]):
-        print(f"DR{i}:", procData['DR' + str(i)])
+if __name__ == "__main__":
+    main()
