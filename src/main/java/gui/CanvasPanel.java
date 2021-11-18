@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -16,6 +17,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import lorasim2.LoRaGateway;
 import lorasim2.LoRaMarkovModel;
+import lorasim2.LoRaModelFactory;
 import lorasim2.LoRaNode;
 
 /**
@@ -52,64 +54,108 @@ public class CanvasPanel extends JPanel {
     @Override
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
+        
         g2.clearRect(0, 0, getWidth(), getHeight());
+        g2.setFont(new Font("sans", Font.BOLD, 16));
         
-        Set<Entry<LoRaNode, Point>> nodes = gui_nodes.entrySet();
-        Set<Entry<LoRaGateway, Point>> gateways = gui_gateways.entrySet();
-
-        /* Set blue stroke for direct node links */
-        g2.setStroke(
-            new BasicStroke(4, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)
-        );
-        g2.setColor(Color.BLUE);
+        this._drawLinks(g2);
+        this._drawNodes(g2);        
+    }
+    
+    private void _drawNodes(Graphics2D g2) {
+        g2.setColor(Color.BLACK);
         
-        /* Draw direct links */
-        gateways.forEach(entry_g -> {
-            nodes.forEach(entry_n -> {
-                Point p1 = entry_g.getValue(),
-                      p2 = entry_n.getValue();
-                g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
-            });
-        });
-        
-        /* Set thin gray dashed stroke for interference links */
-        g2.setStroke(
-            new BasicStroke(1, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL, 0, new float[]{10}, 0)
-        );
-        g2.setColor(Color.GRAY);
-        
-        /* Draw interference links */
-        Object[] nodes_pts = gui_nodes.values().toArray();
-        for (int i = 0; i < nodes_pts.length; i++) {
-            for (int j = i; j < nodes_pts.length; j++) {
-                Point p1 = (Point)nodes_pts[i],
-                      p2 = (Point)nodes_pts[j];
-                g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
-            }
-        }
-        
-        /* Draw nodes */
-        gateways.forEach(e -> {
+        gui_gateways.entrySet().forEach(e -> {
+            Point p = e.getValue();
+            LoRaGateway n = e.getKey();
+            
             g2.drawImage(
                 img_lora_gateway,
-                (int)e.getValue().getX() - NODE_IMG_SIZE/2,
-                (int)e.getValue().getY() - NODE_IMG_SIZE/2,
-                NODE_IMG_SIZE,
-                NODE_IMG_SIZE,
-                this
-            );    
-        });
-        nodes.forEach(e -> {
-            g2.drawImage(
-                img_lora_node,
-                (int)e.getValue().getX() - NODE_IMG_SIZE/2,
-                (int)e.getValue().getY() - NODE_IMG_SIZE/2,
+                (int)p.getX() - NODE_IMG_SIZE/2,
+                (int)p.getY() - NODE_IMG_SIZE/2,
                 NODE_IMG_SIZE,
                 NODE_IMG_SIZE,
                 this
             );
+            
+            int x = (int)(p.getX() - 40);
+            int y = (int)(p.getY() + NODE_IMG_SIZE*0.8);
+            g2.drawString("Gateway", x, y);
         });
         
+        gui_nodes.entrySet().forEach(e -> {
+            Point p = e.getValue();
+            LoRaNode n = e.getKey();
+            
+            g2.drawImage(
+                img_lora_node,
+                (int)p.getX() - NODE_IMG_SIZE/2,
+                (int)p.getY() - NODE_IMG_SIZE/2,
+                NODE_IMG_SIZE,
+                NODE_IMG_SIZE,
+                this
+            );
+            
+            int x = (int)(p.getX() - 25);
+            int y = (int)(p.getY() + NODE_IMG_SIZE*0.8);
+            g2.drawString("DR: " + n.model.DR, x, y);
+
+        });
+    }
+    
+    private void _drawLinks(Graphics2D g2) {
+        /* Set blue stroke for direct node links */
+        g2.setStroke(
+            new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)
+        );
+        g2.setColor(Color.BLUE);
+        
+        /* Draw direct links */
+        gui_gateways.entrySet().forEach(entry_g -> {
+            gui_nodes.entrySet().forEach(entry_n -> {
+                Point p1 = entry_g.getValue(),
+                      p2 = entry_n.getValue();
+                
+                g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
+                
+                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(entry_g.getKey(), entry_n.getKey());
+                int x = (int)(p1.getX() + p2.getX()) / 2,
+                    y = (int)(p1.getY() + p2.getY()) / 2;
+                String str1 = "Dist: " + link_model.distance_m + "m",
+                       str2 = "Interf: " + (int)link_model.interference_percent + "%";
+                g2.drawString(str1, x - 40, y);
+                g2.drawString(str2, x - 40, y + 20);
+            });
+            
+        });
+        
+        /* Set thin red dashed stroke for interference links */
+        g2.setStroke(
+            new BasicStroke(1, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL, 0, new float[]{10}, 0)
+        );
+        g2.setColor(Color.RED);
+        
+        /* Draw interference links */
+        Entry<LoRaNode, Point>[] nodes = gui_nodes.entrySet().toArray(new Entry<LoRaNode, Point>[0]);
+        
+        for (int i = 0; i < nodes.length; i++) {
+            for (int j = i + 1; j < nodes.length; j++) {
+                Point p1 = nodes[i].getValue(),
+                      p2 = nodes[j].getValue();
+                
+                g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
+                
+                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(nodes[i].getKey(), nodes[j].getKey());
+                if (link_model != null) {
+                    int x = (int)(p1.getX() + p2.getX()) / 2,
+                        y = (int)(p1.getY() + p2.getY()) / 2;
+                    String str1 = "Dist: " + link_model.distance_m + "m",
+                           str2 = "Interf: " + (int)link_model.interference_percent + "%";
+                    g2.drawString(str1, x - 40, y);
+                    g2.drawString(str2, x - 40, y + 20);
+                }
+            }
+        }
     }
     
     public void clearAll() {
