@@ -8,15 +8,20 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * @author alex
  */
-public class SimConfigDialog extends JDialog implements ActionListener {
+public class SimConfigDialog extends JDialog implements ActionListener, ChangeListener {
     private CanvasWindow parent;
     private JSpinner n_gateways, n_nodes, sim_duration;
+    private JSlider percent_dr_low, percent_dr_mid, percent_dr_hi;
+    private JLabel l_percent_dr_low, l_percent_dr_mid, l_percent_dr_hi;
     
     public SimConfigDialog(CanvasWindow parent) {
         super();
@@ -36,6 +41,13 @@ public class SimConfigDialog extends JDialog implements ActionListener {
         gbc.ipadx = gbc.ipady = 5;
         gbc.gridx = gbc.gridy = 0;
 
+        this.add(new JLabel("Simulation duration (s):"), gbc);
+        gbc.gridx++;
+        sim_duration = new JSpinner(new SpinnerNumberModel(600, 0, Integer.MAX_VALUE, 1));
+        this.add(sim_duration, gbc);
+        
+        gbc.gridy++;
+        gbc.gridx = 0;
         this.add(new JLabel("Number of gateways:"), gbc);
         gbc.gridx++;
         n_gateways = new JSpinner(new SpinnerNumberModel(1, 1, 5, 1));
@@ -50,11 +62,36 @@ public class SimConfigDialog extends JDialog implements ActionListener {
         
         gbc.gridy++;
         gbc.gridx = 0;
-        this.add(new JLabel("Simulation duration (s):"), gbc);
+        this.add(new JLabel("Percentage of nodes with low DR:"), gbc);
         gbc.gridx++;
-        sim_duration = new JSpinner(new SpinnerNumberModel(600, 0, Integer.MAX_VALUE, 1));
-        this.add(sim_duration, gbc);
+        percent_dr_low = new JSlider(0, 100, 50);
+        percent_dr_low.addChangeListener(this);
+        this.add(percent_dr_low, gbc);
+        gbc.gridx++;
+        l_percent_dr_low = new JLabel(String.format("%d%%", percent_dr_low.getValue()));
+        this.add(l_percent_dr_low, gbc);
         
+        gbc.gridy++;
+        gbc.gridx = 0;
+        this.add(new JLabel("Percentage of nodes with medium DR:"), gbc);
+        gbc.gridx++;
+        percent_dr_mid = new JSlider(0, 100, 20);
+        percent_dr_mid.addChangeListener(this);
+        this.add(percent_dr_mid, gbc);
+        gbc.gridx++;
+        l_percent_dr_mid = new JLabel(String.format("%d%%", percent_dr_mid.getValue()));
+        this.add(l_percent_dr_mid, gbc);
+        
+        gbc.gridy++;
+        gbc.gridx = 0;
+        this.add(new JLabel("Percentage of nodes with high DR:"), gbc);
+        gbc.gridx++;
+        percent_dr_hi = new JSlider(0, 100, 30);
+        percent_dr_hi.addChangeListener(this);
+        this.add(percent_dr_hi, gbc);
+        gbc.gridx++;
+        l_percent_dr_hi = new JLabel(String.format("%d%%", percent_dr_hi.getValue()));
+        this.add(l_percent_dr_hi, gbc);
         
         gbc.gridy++;
         gbc.gridx = 0;
@@ -80,5 +117,20 @@ public class SimConfigDialog extends JDialog implements ActionListener {
                 new ActionEvent(this, 0, "conf-sim-ok")
             );
         }
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent ce) {
+        JSlider source = (JSlider)ce.getSource();
+        String txt = String.format("%d%%", source.getValue());
+        
+        if (source == percent_dr_low)
+            l_percent_dr_low.setText(txt);
+        else if (source == percent_dr_mid)
+            l_percent_dr_mid.setText(txt);
+        else if (source == percent_dr_hi)
+            l_percent_dr_hi.setText(txt);
+        else
+            System.err.println("Unknown source in JSlider ChangeListener");
     }
 }
