@@ -46,13 +46,23 @@ def markov_chain(data, dr):
     print("######################################################")
 
     print("Creating .ini model...")
-    folder = sys.argv[1].split('.')
-    #print(folder)                  # Careful when moving data around, this may help
-    folder = folder[2].split('/')
+
+    folder = sys.argv[1].split('.') # Isolate the path
+    #print(folder)                   # Careful when moving data around, this may help
+    
+    folder = folder[2].split('/')   # Isolate the triplet "500-0-0"
     #print(folder)
-    with open("./files/" + folder[3] + "_DR" + str(dr) + ".ini", 'w') as file:
-        file.write('title=\n')
-        file.write('description=\n')
+
+    tmp = folder[3].split('-')      # Get the 3 components from the triplet
+    distance_TX_RX = tmp[0]         # Distance RX-TX
+    distance_Int_RX = tmp[1]        # Distance Int-TX
+    pr_Int = tmp[2]                 # Probability of transmission
+    
+    with open("./files_jan/" + folder[3] + "_DR" + str(dr) + ".ini", 'w') as file:
+        file.write('dr=' + str(dr) + '\n')
+        file.write('distance_TX_RX=' + distance_TX_RX + '\n')
+        file.write('distance_Int_RX=' + distance_Int_RX + '\n')
+        file.write('pr_Int=' + pr_Int + '\n')
         file.write('p00={:.03f}\n'.format(P[0][0]))
         file.write('p01={:.03f}\n'.format(P[0][1]))
         file.write('p10={:.03f}\n'.format(P[1][0]))
