@@ -9,10 +9,10 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import lorasim2.LoRaGateway;
@@ -136,16 +136,19 @@ public class CanvasPanel extends JPanel {
         g2.setColor(Color.RED);
         
         /* Draw interference links */
-        Entry<LoRaNode, Point>[] nodes = gui_nodes.entrySet().toArray(new Entry<LoRaNode, Point>[0]);
+        ArrayList<Entry<LoRaNode, Point>> nodes = new ArrayList<>();
+        gui_nodes.entrySet().forEach(x -> {
+            nodes.add(x);
+        });
         
-        for (int i = 0; i < nodes.length; i++) {
-            for (int j = i + 1; j < nodes.length; j++) {
-                Point p1 = nodes[i].getValue(),
-                      p2 = nodes[j].getValue();
+        for (int i = 0; i < nodes.size(); i++) {
+            for (int j = i + 1; j < nodes.size(); j++) {
+                Point p1 = nodes.get(i).getValue(),
+                      p2 = nodes.get(j).getValue();
                 
                 g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
                 
-                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(nodes[i].getKey(), nodes[j].getKey());
+                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(nodes.get(i).getKey(), nodes.get(j).getKey());
                 if (link_model != null) {
                     int x = (int)(p1.getX() + p2.getX()) / 2,
                         y = (int)(p1.getY() + p2.getY()) / 2;
@@ -169,7 +172,7 @@ public class CanvasPanel extends JPanel {
             NODE_IMG_SIZE + rng.nextInt(this.getWidth() - NODE_IMG_SIZE*2),
             NODE_IMG_SIZE + rng.nextInt(this.getHeight() - NODE_IMG_SIZE*2)
         );
-        gui_nodes.put(new LoRaNode(new LoRaMarkovModel()), p);
+        gui_nodes.put(new LoRaNode(new LoRaMarkovModel(0)), p);
         
         this.repaint();
     }

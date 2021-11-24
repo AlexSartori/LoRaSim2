@@ -33,7 +33,7 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
         this.setTitle("Configure Simulation");
         this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
         this.setLayout(new GridBagLayout());
-        this.setSize(400, 200);
+        this.setSize(600, 400);
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.LINE_START;
