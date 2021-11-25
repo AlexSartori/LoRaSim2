@@ -19,12 +19,14 @@ import lorasim2.LoRaGateway;
 import lorasim2.LoRaMarkovModel;
 import lorasim2.LoRaModelFactory;
 import lorasim2.LoRaNode;
+import lorasim2.Simulator;
 
 /**
  *
  * @author alex
  */
 public class CanvasPanel extends JPanel {
+    private final Simulator simulator;
     private final SimConfigDialog config_dialog;
     private final int NODE_IMG_SIZE = 70;
     private final Random rng = new Random();
@@ -34,8 +36,9 @@ public class CanvasPanel extends JPanel {
     private final HashMap<LoRaNode, Point> gui_nodes;
     private final HashMap<LoRaGateway, Point> gui_gateways;
     
-    public CanvasPanel(SimConfigDialog conf) {
+    public CanvasPanel(Simulator sim, SimConfigDialog conf) {
         super();
+        this.simulator = sim;
         this.config_dialog = conf;
         this.gui_nodes = new HashMap<>();
         this.gui_gateways = new HashMap<>();
@@ -120,15 +123,10 @@ public class CanvasPanel extends JPanel {
                 
                 g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
                 
-                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(
-                    entry_g.getKey(), entry_n.getKey(), _calcPointDistance(p1, p2)
-                );
                 int x = (int)(p1.getX() + p2.getX()) / 2,
                     y = (int)(p1.getY() + p2.getY()) / 2;
-                String str1 = "Dist: " + link_model.distance_m + "m",
-                       str2 = "Interf: " + (int)link_model.interference_percent + "%";
+                String str1 = "Dist: " + (int)calcDistance(entry_g.getKey(), entry_n.getKey()) + "m";
                 g2.drawString(str1, x - 40, y);
-                g2.drawString(str2, x - 40, y + 20);
             });
             
         });
@@ -152,17 +150,11 @@ public class CanvasPanel extends JPanel {
                 
                 g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
                 
-                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(
-                    nodes.get(i).getKey(), nodes.get(j).getKey(), _calcPointDistance(p1, p2)
-                );
-                if (link_model != null) {
-                    int x = (int)(p1.getX() + p2.getX()) / 2,
-                        y = (int)(p1.getY() + p2.getY()) / 2;
-                    String str1 = "Dist: " + link_model.distance_m + "m",
-                           str2 = "Interf: " + (int)link_model.interference_percent + "%";
-                    g2.drawString(str1, x - 40, y);
-                    g2.drawString(str2, x - 40, y + 20);
-                }
+                int x = (int)(p1.getX() + p2.getX()) / 2,
+                    y = (int)(p1.getY() + p2.getY()) / 2;
+                String str1 = "Dist: " + (int)calcDistance(nodes.get(i).getKey(), nodes.get(j).getKey()) + "m";
+                g2.drawString(str1, x - 40, y);
+                // g2.drawString(str2, x - 40, y + 20);
             }
         }
     }
@@ -173,27 +165,30 @@ public class CanvasPanel extends JPanel {
         this.repaint();
     }
     
-    public void addRandomNode() {
+    public void randomlyPlaceNewNode(LoRaNode n) {
         Point p = new Point(
             NODE_IMG_SIZE + rng.nextInt(this.getWidth() - NODE_IMG_SIZE*2),
             NODE_IMG_SIZE + rng.nextInt(this.getHeight() - NODE_IMG_SIZE*2)
         );
-        gui_nodes.put(new LoRaNode(0), p);
+        gui_nodes.put(n, p);
         
         this.repaint();
     }
     
-    public void addRandomGateway() {
+    public void randomlyPlaceNewGateway(LoRaGateway g) {
         Point p = new Point(
             NODE_IMG_SIZE + rng.nextInt(this.getWidth() - NODE_IMG_SIZE*2),
             NODE_IMG_SIZE + rng.nextInt(this.getHeight() - NODE_IMG_SIZE*2)
         );
-        gui_gateways.put(new LoRaGateway(), p);
+        gui_gateways.put(g, p);
         
         this.repaint();
     }
     
-    private float _calcPointDistance(Point p1, Point p2) {
+    public float calcDistance(LoRaNode n1, LoRaNode n2) {
+        Point p1 = n1 instanceof LoRaGateway ? gui_gateways.get(n1) : gui_nodes.get(n1),
+              p2 = n2 instanceof LoRaGateway ? gui_gateways.get(n2) : gui_nodes.get(n2);
+        
         return (float)Math.sqrt(
             Math.pow(
                 (float)p1.getX() - (float)p2.getX(), 2

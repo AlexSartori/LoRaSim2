@@ -18,12 +18,12 @@ import javax.swing.event.ChangeListener;
  * @author alex
  */
 public class SimConfigDialog extends JDialog implements ActionListener, ChangeListener {
-    private CanvasWindow parent;
+    private MainWindow parent;
     private JSpinner n_gateways, n_nodes, sim_duration, gui_scale;
     private JSlider percent_dr_low, percent_dr_mid, percent_dr_hi;
     private JLabel l_percent_dr_low, l_percent_dr_mid, l_percent_dr_hi;
     
-    public SimConfigDialog(CanvasWindow parent) {
+    public SimConfigDialog(MainWindow parent) {
         super();
         this.initUI();
         this.parent = parent;
