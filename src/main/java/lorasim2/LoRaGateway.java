@@ -5,6 +5,6 @@ package lorasim2;
  */
 public class LoRaGateway extends LoRaNode {
     public LoRaGateway() {
-        super(null);
+        super(-1);
     }
 }

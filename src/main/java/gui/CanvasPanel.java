@@ -25,6 +25,7 @@ import lorasim2.LoRaNode;
  * @author alex
  */
 public class CanvasPanel extends JPanel {
+    private final SimConfigDialog config_dialog;
     private final int NODE_IMG_SIZE = 70;
     private final Random rng = new Random();
     
@@ -33,8 +34,9 @@ public class CanvasPanel extends JPanel {
     private final HashMap<LoRaNode, Point> gui_nodes;
     private final HashMap<LoRaGateway, Point> gui_gateways;
     
-    public CanvasPanel() {
+    public CanvasPanel(SimConfigDialog conf) {
         super();
+        this.config_dialog = conf;
         this.gui_nodes = new HashMap<>();
         this.gui_gateways = new HashMap<>();
         
@@ -98,7 +100,7 @@ public class CanvasPanel extends JPanel {
             
             int x = (int)(p.getX() - 25);
             int y = (int)(p.getY() + NODE_IMG_SIZE*0.8);
-            g2.drawString("DR: " + n.model.DR, x, y);
+            g2.drawString("DR: " + n.DR, x, y);
 
         });
     }
@@ -118,7 +120,9 @@ public class CanvasPanel extends JPanel {
                 
                 g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
                 
-                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(entry_g.getKey(), entry_n.getKey());
+                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(
+                    entry_g.getKey(), entry_n.getKey(), _calcPointDistance(p1, p2)
+                );
                 int x = (int)(p1.getX() + p2.getX()) / 2,
                     y = (int)(p1.getY() + p2.getY()) / 2;
                 String str1 = "Dist: " + link_model.distance_m + "m",
@@ -148,7 +152,9 @@ public class CanvasPanel extends JPanel {
                 
                 g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
                 
-                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(nodes.get(i).getKey(), nodes.get(j).getKey());
+                LoRaMarkovModel link_model = LoRaModelFactory.getLinkModel(
+                    nodes.get(i).getKey(), nodes.get(j).getKey(), _calcPointDistance(p1, p2)
+                );
                 if (link_model != null) {
                     int x = (int)(p1.getX() + p2.getX()) / 2,
                         y = (int)(p1.getY() + p2.getY()) / 2;
@@ -172,7 +178,7 @@ public class CanvasPanel extends JPanel {
             NODE_IMG_SIZE + rng.nextInt(this.getWidth() - NODE_IMG_SIZE*2),
             NODE_IMG_SIZE + rng.nextInt(this.getHeight() - NODE_IMG_SIZE*2)
         );
-        gui_nodes.put(new LoRaNode(new LoRaMarkovModel(0)), p);
+        gui_nodes.put(new LoRaNode(0), p);
         
         this.repaint();
     }
@@ -185,6 +191,16 @@ public class CanvasPanel extends JPanel {
         gui_gateways.put(new LoRaGateway(), p);
         
         this.repaint();
+    }
+    
+    private float _calcPointDistance(Point p1, Point p2) {
+        return (float)Math.sqrt(
+            Math.pow(
+                (float)p1.getX() - (float)p2.getX(), 2
+            ) + Math.pow(
+                (float)p1.getY() - p2.getY(), 2
+            )
+        ) * config_dialog.getGuiScale();
     }
     
     /*private LoRaNode getClosestNodeToPoint(Point p) {

@@ -16,12 +16,12 @@ public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
     private JToolBar toolbar;
     private CanvasPanel canvas;
     private ResultsPanel res_panel;
-    private SimConfigDialog sim_config;
+    private final SimConfigDialog sim_config;
     
     public CanvasWindow() {
         super();
-        this.initUI();
         sim_config = new SimConfigDialog(this);
+        this.initUI();
     }
     
     private void initUI() {
@@ -42,7 +42,7 @@ public class CanvasWindow extends javax.swing.JFrame implements ActionListener {
         this.add(toolbar, BorderLayout.NORTH);
         
         /* Canvas ----------------------------------------------------------- */
-        canvas = new CanvasPanel();
+        canvas = new CanvasPanel(this.sim_config);
         this.add(canvas, BorderLayout.CENTER);
         
         /* Results Panel ---------------------------------------------------- */

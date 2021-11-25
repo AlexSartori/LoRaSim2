@@ -9,13 +9,13 @@ public class LoRaMarkovModel {
     public final int distance_m;
     public final float interference_percent;
     
-    public LoRaMarkovModel(int dr) {
+    public LoRaMarkovModel(int dr, float distance) {
         P = new double[][] {
             { 0.5, 0.5 },
             { 0.5, 0.5 }
         };
         DR = dr;
-        distance_m = 1000;
+        distance_m = (int)distance;
         interference_percent = 20;
     }
 }

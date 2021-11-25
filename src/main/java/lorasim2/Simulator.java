@@ -17,10 +17,5 @@ public class Simulator {
     }
     
     public void runSimulation() {
-        for (LoRaNode n : nodes) {
-            System.out.println("Node #" + n.id);
-            System.out.println("  [" + n.model.P[0][0] + ", " + n.model.P[0][1] + "]");
-            System.out.println("  [" + n.model.P[1][0] + ", " + n.model.P[1][1] + "]");
-        }
     }
 }

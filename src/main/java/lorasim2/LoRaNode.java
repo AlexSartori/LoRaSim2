@@ -6,11 +6,11 @@ package lorasim2;
 public class LoRaNode {
     private static int _global_id_counter = 0;
     public final int id;
-    public final LoRaMarkovModel model;
-    
-    public LoRaNode(LoRaMarkovModel model) {
+    public final int DR;
+
+    public LoRaNode(int dr) {
         this.id = LoRaNode._global_id_counter++;
-        this.model = model;
+        this.DR = dr;
     }
     
     @Override
