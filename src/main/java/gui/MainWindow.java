@@ -5,11 +5,14 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import lorasim2.LoRaGateway;
+import lorasim2.LoRaMarkovModel;
+import lorasim2.LoRaModelFactory;
 import lorasim2.LoRaNode;
 import lorasim2.Simulator;
 
@@ -59,9 +62,11 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
     private void _createSimulation(int n_nodes, int n_gateways) {
         ArrayList<LoRaNode> nodes = new ArrayList<>();
         ArrayList<LoRaGateway> gateways = new ArrayList<>();
+        Random rng = new Random();
         
         for (int i = 0; i < n_nodes; i++) {
-            LoRaNode n = new LoRaNode(0);
+            int dr = rng.nextInt(4) * 2;
+            LoRaNode n = new LoRaNode(dr);
             nodes.add(n);
             simulator.addNode(n);
             canvas.randomlyPlaceNewNode(n);
@@ -69,9 +74,42 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         for (int i = 0; i < n_gateways; i++) {
             LoRaGateway g = new LoRaGateway();
             gateways.add(g);
-            simulator.addNode(g);
+            simulator.addGateway(g);
             canvas.randomlyPlaceNewGateway(g);
         }
+        
+        gateways.forEach(gw -> {
+            nodes.forEach(n -> {
+                try {
+                    LoRaMarkovModel model = LoRaModelFactory.getLinkModel(gw, n, canvas.calcDistance(gw, n));
+                    if (model != null)
+                        simulator.setLinkModel(gw, n, model);
+                    else
+                        System.out.println("[Main]: Warning: no model found for nodes: " + gw.id + " --> " + n.id);
+                } catch (Exception e) {
+                    System.err.println("[Main]: Failed to set model for link: " + gw.id + " <--> " + n.id);
+                }
+            });
+        });
+        
+        nodes.forEach(n1 -> {
+            nodes.forEach(n2 ->{
+                if (n1 == n2)
+                    return;
+                
+                try {
+                    LoRaMarkovModel model = LoRaModelFactory.getLinkModel(n1, n2, canvas.calcDistance(n1, n2));
+                    if (model != null)
+                        simulator.setLinkModel(n1, n2, model);
+                    else
+                        System.out.println("[Main]: Warning: no model found for nodes: " + n1.id + " --> " + n2.id);
+                } catch (Exception e) {
+                    System.err.println("[Main]: Failed to set model for link: " + n1.id + " <--> " + n2.id);
+                }
+            });
+        });
+        
+        simulator.runSimulation();
     }
 
     @Override
@@ -88,7 +126,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
                 canvas.repaint();
                 break;
             default:
-                System.err.println("Unexpected action command in CanvasWindow listener: " + cmd);
+                System.err.println("[Main]: Unexpected action command in CanvasWindow listener: " + cmd);
                 break;
         }
     }

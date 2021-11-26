@@ -52,7 +52,7 @@ public class CanvasPanel extends JPanel {
             url = this.getClass().getClassLoader().getResource("lora-gateway.png");
             img_lora_gateway = ImageIO.read(url);
         } catch (IOException e) {
-            System.err.println("Error loading some resources: " + e.getMessage());
+            System.err.println("[Canvas]: Error loading some resources: " + e.getMessage());
         }
     }
     
@@ -85,7 +85,8 @@ public class CanvasPanel extends JPanel {
             
             int x = (int)(p.getX() - 40);
             int y = (int)(p.getY() + NODE_IMG_SIZE*0.8);
-            g2.drawString("Gateway", x, y);
+            String str = "Gateway (id:" + n.id + ")";
+            g2.drawString(str, x, y);
         });
         
         gui_nodes.entrySet().forEach(e -> {
@@ -103,7 +104,8 @@ public class CanvasPanel extends JPanel {
             
             int x = (int)(p.getX() - 25);
             int y = (int)(p.getY() + NODE_IMG_SIZE*0.8);
-            g2.drawString("DR: " + n.DR, x, y);
+            String str = "DR " + n.DR + " (id:" + n.id + ")";
+            g2.drawString(str, x, y);
 
         });
     }
@@ -118,15 +120,19 @@ public class CanvasPanel extends JPanel {
         /* Draw direct links */
         gui_gateways.entrySet().forEach(entry_g -> {
             gui_nodes.entrySet().forEach(entry_n -> {
+                LoRaMarkovModel model = simulator.getLinkModel(entry_g.getKey(), entry_n.getKey());
+                if (model == null) return;
+                
                 Point p1 = entry_g.getValue(),
                       p2 = entry_n.getValue();
-                
                 g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
                 
                 int x = (int)(p1.getX() + p2.getX()) / 2,
                     y = (int)(p1.getY() + p2.getY()) / 2;
-                String str1 = "Dist: " + (int)calcDistance(entry_g.getKey(), entry_n.getKey()) + "m";
+                String str1 = "Dist: " + model.distance_m + "m",
+                       str2 = "DR: " + model.DR;
                 g2.drawString(str1, x - 40, y);
+                g2.drawString(str2, x - 20, y + 20);
             });
             
         });
@@ -145,16 +151,19 @@ public class CanvasPanel extends JPanel {
         
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = i + 1; j < nodes.size(); j++) {
+                LoRaMarkovModel model = simulator.getLinkModel(nodes.get(i).getKey(), nodes.get(j).getKey());
+                if (model == null) continue;
+                
                 Point p1 = nodes.get(i).getValue(),
                       p2 = nodes.get(j).getValue();
-                
                 g2.drawLine((int)p1.getX(), (int)p1.getY(), (int)p2.getX(), (int)p2.getY());
                 
                 int x = (int)(p1.getX() + p2.getX()) / 2,
                     y = (int)(p1.getY() + p2.getY()) / 2;
-                String str1 = "Dist: " + (int)calcDistance(nodes.get(i).getKey(), nodes.get(j).getKey()) + "m";
+                String str1 = "Dist: " + model.distance_m + "m",
+                       str2 = "DR: " + model.DR;
                 g2.drawString(str1, x - 40, y);
-                // g2.drawString(str2, x - 40, y + 20);
+                g2.drawString(str2, x - 20, y + 20);
             }
         }
     }

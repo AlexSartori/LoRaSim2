@@ -36,9 +36,9 @@ public class LoRaModelFactory {
                 models.add(m_model);
             }
         } catch (IOException ex) {
-            System.err.println("Error loading models: " + ex.getMessage());
+            System.err.println("[ModelFactory]: Error loading models: " + ex.getMessage());
         } catch (URISyntaxException ex) {
-            System.err.println("Couldn't find models archive: " + ex.getMessage());
+            System.err.println("[ModelFactory]: Couldn't find models archive: " + ex.getMessage());
         }
     }
     
@@ -46,14 +46,16 @@ public class LoRaModelFactory {
         if (models == null)
             _loadModels();
         
-        int DR = n1 instanceof LoRaGateway ? n2.DR : n1.DR;
+        if (n1.DR != -1 && n2.DR != -1 && n1.DR != n2.DR)
+            return null;
         
-        System.out.println("Searching for best fitting model to:");
-        System.out.println("    DR: " + DR);
-        System.out.println("    Distance: " + (int)target_distance + "m");
+        int DR = n1 instanceof LoRaGateway ? n2.DR : n1.DR;
         
         ArrayList<LoRaMarkovModel> candidates = new ArrayList<>();
         models.forEach(m -> { if (m.DR == DR) candidates.add(m); });
+        
+        if (candidates.size() == 0)
+            System.err.println("[ModelFactory]: No candidates for DR = " + DR);
         
         LoRaMarkovModel closest_model = null;
         float smallest_delta = -1;
@@ -64,8 +66,6 @@ public class LoRaModelFactory {
                 closest_model = m;
             }
         }
-        
-        System.out.println("Found with smallest delta = " + smallest_delta);
         
         return closest_model;
     }
