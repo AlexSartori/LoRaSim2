@@ -19,7 +19,7 @@ import javax.swing.event.ChangeListener;
  */
 public class SimConfigDialog extends JDialog implements ActionListener, ChangeListener {
     private MainWindow parent;
-    private JSpinner n_gateways, n_nodes, sim_duration, gui_scale;
+    private JSpinner n_gateways, n_nodes, sim_duration, gui_scale, payload_size;
     private JSlider percent_dr_low, percent_dr_mid, percent_dr_hi;
     private JLabel l_percent_dr_low, l_percent_dr_mid, l_percent_dr_hi;
     
@@ -95,6 +95,14 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
         
         gbc.gridy++;
         gbc.gridx = 0;
+        this.add(new JLabel("Payload size (bytes):"), gbc);
+        gbc.gridx++;
+        payload_size = new JSpinner(new SpinnerNumberModel(8, 1, 64, 1));
+        payload_size.addChangeListener(this);
+        this.add(payload_size, gbc);
+        
+        gbc.gridy++;
+        gbc.gridx = 0;
         this.add(new JLabel("Interface scale (1 pixel = ? meters)"), gbc);
         gbc.gridx++;
         gui_scale = new JSpinner(new SpinnerNumberModel(2, 0, 50, 1));
@@ -115,6 +123,10 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
     
     public int getNumOfNodes() {
         return (int)n_nodes.getValue();
+    }
+    
+    public int getPayloadSize() {
+        return (int)payload_size.getValue();
     }
     
     public int getGuiScale() {

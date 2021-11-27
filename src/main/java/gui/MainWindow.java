@@ -109,6 +109,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
             });
         });
         
+        simulator.setPayloadSize(sim_config.getPayloadSize());
         simulator.runSimulation();
     }
 
