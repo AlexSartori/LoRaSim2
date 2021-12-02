@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,6 +15,7 @@ import lorasim2.LoRaGateway;
 import lorasim2.LoRaMarkovModel;
 import lorasim2.LoRaModelFactory;
 import lorasim2.LoRaNode;
+import lorasim2.SimulationResults;
 import lorasim2.Simulator;
 
 /**
@@ -56,6 +58,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         
         /* Results Panel ---------------------------------------------------- */
         res_panel = new ResultsPanel();
+        res_panel.setMinimumSize(new Dimension(500, 800));
         this.add(res_panel, BorderLayout.EAST);
     }
     
@@ -63,6 +66,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         ArrayList<LoRaNode> nodes = new ArrayList<>();
         ArrayList<LoRaGateway> gateways = new ArrayList<>();
         Random rng = new Random();
+        simulator.resetSimulation();
         
         for (int i = 0; i < n_nodes; i++) {
             int dr = rng.nextInt(4) * 2;
@@ -110,7 +114,8 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         });
         
         simulator.setPayloadSize(sim_config.getPayloadSize());
-        simulator.runSimulation();
+        SimulationResults res = simulator.runSimulation(sim_config.getSimDuration());
+        res_panel.plot(res);
     }
 
     @Override

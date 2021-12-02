@@ -1,5 +1,6 @@
 package gui;
 
+import com.sun.jdi.FloatValue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -115,6 +116,10 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
         JButton btn_ok = new JButton("Ok");
         btn_ok.addActionListener(this);
         this.add(btn_ok, gbc);
+    }
+    
+    public int getSimDuration() {
+        return (int)sim_duration.getValue();
     }
     
     public int getNumOfGateways() {

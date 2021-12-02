@@ -14,7 +14,8 @@ enum EventType {
     SIMULATION_START,
     SIMULATION_END,
     TX_START,
-    TX_END
+    TX_END,
+    NO_TX_END
 };
 
 class SimulationEvent {
@@ -74,6 +75,10 @@ public class Simulator {
     
     public void resetSimulation() {
         time_ms = 0;
+        nodes.clear();
+        gateways.clear();
+        link_models.clear();
+        events_queue.clear();
     }
     
     public void addNode(LoRaNode node) {
@@ -103,16 +108,15 @@ public class Simulator {
         return null;
     }
     
-    public SimulationResults runSimulation() {
+    public SimulationResults runSimulation(int duration) {
         SimulationResults result = new SimulationResults();
         
         events_queue.add(new SimulationEvent(null, 0, EventType.SIMULATION_START));
-        events_queue.add(new SimulationEvent(null, 3E3f, EventType.SIMULATION_END));
+        events_queue.add(new SimulationEvent(null, duration, EventType.SIMULATION_END));
         
         while (events_queue.size() > 0) {
             SimulationEvent curr_event = events_queue.remove();
             this.time_ms = curr_event.event_time;
-            _simLog("Event: " + curr_event.event_time);
             
             switch (curr_event.type) {
                 case SIMULATION_START:
@@ -121,14 +125,20 @@ public class Simulator {
                     break;
                 case SIMULATION_END:
                     _simLog("Simulation ended");
+                    events_queue.clear();
                     break;
                 case TX_START:
                     _simLog("Beginning TX for node #" + curr_event.node.id);
+                    result.begin_tx(curr_event.node, time_ms);
                     _transmitPacket(curr_event.node);
                     break;
                 case TX_END:
                     _simLog("Ended TX for node #" + curr_event.node.id);
-                    events_queue.clear();
+                    result.end_tx(curr_event.node, time_ms, true);
+                    _scheduleNextTransmission(curr_event.node);
+                    break;
+                case NO_TX_END:
+                    _scheduleNextTransmission(curr_event.node);
                     break;
             }
         }
@@ -141,6 +151,9 @@ public class Simulator {
             events_queue.add(
                 new SimulationEvent(n, this.time_ms, EventType.TX_START)
             );
+        else        
+            events_queue.add(new SimulationEvent(n, this.time_ms + _getPacketAirtime(n.DR), EventType.NO_TX_END)
+            );    
     }
     
     private void _transmitPacket(LoRaNode n) {
