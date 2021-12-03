@@ -15,7 +15,10 @@ enum EventType {
     SIMULATION_END,
     TX_START,
     TX_END,
-    NO_TX_END
+    NO_TX_END,
+    RX_START,
+    RX_END_OK,
+    RX_END_FAIL
 };
 
 class SimulationEvent {
@@ -39,12 +42,21 @@ class SimulationEvent {
     }
 }
 
+class LoRaLink {
+    public LoRaNode n1, n2;
+    public LoRaLink(LoRaNode a, LoRaNode b) { n1 = a; n2 = b; }
+    @Override
+    public boolean equals(Object l2) { return n1.id == ((LoRaLink)l2).n1.id && n2.id == ((LoRaLink)l2).n2.id; }
+    @Override
+    public int hashCode() { return n1.hashCode() + n2.hashCode(); }
+}
+
 public class Simulator {
     private float time_ms;
     private int payload_size;
     private ArrayList<LoRaNode> nodes;
     private ArrayList<LoRaGateway> gateways;
-    private HashMap<LoRaNode, HashMap<LoRaNode, LoRaMarkovModel>> link_models;
+    private HashMap<LoRaLink, LoRaMarkovModel> link_models;
     private PriorityQueue<SimulationEvent> events_queue;
     private final Random RNG;
     
@@ -91,21 +103,17 @@ public class Simulator {
     
     public void setLinkModel(LoRaNode n1, LoRaNode n2, LoRaMarkovModel m) throws Exception {
         if (!nodes.contains(n1) && !gateways.contains(n1))
-            throw new Exception("[Simulator]: Unknown node: " + n1.id);
+            throw new Exception("Unknown node: " + n1.id);
         if (!nodes.contains(n2) && !gateways.contains(n2))
-            throw new Exception("[Simulator]: Unknown node: " + n2.id);
+            throw new Exception("Unknown node: " + n2.id);
         
-        if (!link_models.containsKey(n1))
-            link_models.put(n1, new HashMap<>());
-        
-        link_models.get(n1).put(n2, m);
+        link_models.put(new LoRaLink(n1, n2), m);
         _simLog("[Simulator]: Added link " + n1.id + " <--> " + n2.id);
     }
     
     public LoRaMarkovModel getLinkModel(LoRaNode n1, LoRaNode n2) {
-        if (link_models.containsKey(n1) && link_models.get(n1).containsKey(n2))
-            return link_models.get(n1).get(n2);
-        return null;
+        LoRaLink link = new LoRaLink(n1, n2);
+        return link_models.get(link);
     }
     
     public SimulationResults runSimulation(int duration) {
@@ -140,6 +148,15 @@ public class Simulator {
                 case NO_TX_END:
                     _scheduleNextTransmission(curr_event.node);
                     break;
+                case RX_START:
+                    result.begin_rx(curr_event.node, time_ms);
+                    break;
+                case RX_END_OK:
+                    result.end_rx(curr_event.node, time_ms, true);
+                    break;
+                case RX_END_FAIL:
+                    result.end_rx(curr_event.node, time_ms, false);
+                    break;
             }
         }
         
@@ -147,20 +164,36 @@ public class Simulator {
     }
     
     private void _scheduleNextTransmission(LoRaNode n) {
-        if (RNG.nextFloat() <= n.tx_prob && link_models.containsKey(n))
+        if (RNG.nextFloat() <= n.tx_prob)
             events_queue.add(
                 new SimulationEvent(n, this.time_ms, EventType.TX_START)
             );
         else        
-            events_queue.add(new SimulationEvent(n, this.time_ms + _getPacketAirtime(n.DR), EventType.NO_TX_END)
+            events_queue.add(
+                new SimulationEvent(n, this.time_ms + _getPacketAirtime(n.DR), EventType.NO_TX_END)
             );    
     }
     
     private void _transmitPacket(LoRaNode n) {
-        // set node as busy
-        events_queue.add(
-            new SimulationEvent(n, this.time_ms + _getPacketAirtime(n.DR), EventType.TX_END)
-        );
+        float end_time = this.time_ms + _getPacketAirtime(n.DR);
+        
+        for (LoRaLink l : link_models.keySet()) {
+            if (l.n1 != n) continue;
+            
+            events_queue.add(new SimulationEvent(l.n2, this.time_ms, EventType.RX_START));
+            
+            LoRaMarkovModel m = link_models.get(l);
+            m.nextState(RNG);
+            
+            events_queue.add(
+                new SimulationEvent(
+                    l.n2, end_time,
+                    m.getSCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS ? EventType.RX_END_OK : EventType.RX_END_FAIL
+                )
+            );
+        }
+        
+        events_queue.add(new SimulationEvent(n, end_time, EventType.TX_END));
     }
     
     private float _getPacketAirtime(int DR) {
