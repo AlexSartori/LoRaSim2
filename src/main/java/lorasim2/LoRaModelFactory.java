@@ -1,6 +1,7 @@
 package lorasim2;
 
 import eu.hgweb.jini.Ini;
+import eu.hgweb.jini.Section;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -17,21 +18,27 @@ public class LoRaModelFactory {
     
     private static void _loadModels() {
         models = new ArrayList<>();
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         
         try {
+            ClassLoader classLoader = ClassLoader.getSystemClassLoader();
             File archive = new File(classLoader.getResource("models_v1.zip").toURI());
-        
-            ZipInputStream zis = new ZipInputStream(
-                new FileInputStream(archive)
-            );
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(archive));
             
             for (ZipEntry ze = zis.getNextEntry(); ze != null; ze = zis.getNextEntry()) {
                 // 'zis' is the input stream and will yield an 'EOF' before the next entry
                 Ini ini_model = new Ini(zis, true);
+                Section s = ini_model.section("");
+                
+                float[][] P = new float[][] {
+                    { Float.parseFloat(s.value("p00")), Float.parseFloat(s.value("p01")) },
+                    { Float.parseFloat(s.value("p10")), Float.parseFloat(s.value("p11")) }
+                };
+                
                 LoRaMarkovModel m_model = new LoRaMarkovModel(
-                    Integer.parseInt(ini_model.section("").value("dr")),
-                    Float.parseFloat(ini_model.section("").value("distance_TX_RX"))
+                    P,
+                    Integer.parseInt(s.value("dr")),
+                    Float.parseFloat(s.value("distance_TX_RX")),
+                    Float.parseFloat(s.value("pr_Int"))
                 );
                 models.add(m_model);
             }

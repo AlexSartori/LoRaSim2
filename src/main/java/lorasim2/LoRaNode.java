@@ -19,4 +19,9 @@ public class LoRaNode {
     public int hashCode() {
         return this.id;
     }
+    
+    @Override
+    public boolean equals(Object n) {
+        return id == ((LoRaNode)n).id;
+    }
 }
