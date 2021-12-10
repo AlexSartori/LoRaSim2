@@ -1,6 +1,5 @@
 package gui;
 
-import com.sun.jdi.FloatValue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -20,7 +19,7 @@ import javax.swing.event.ChangeListener;
  */
 public class SimConfigDialog extends JDialog implements ActionListener, ChangeListener {
     private MainWindow parent;
-    private JSpinner n_gateways, n_nodes, sim_duration, gui_scale, payload_size;
+    private JSpinner n_gateways, n_nodes, sim_duration, gui_scale, payload_size, tx_rnd_delay;
     private JSlider percent_dr_low, percent_dr_mid, percent_dr_hi;
     private JLabel l_percent_dr_low, l_percent_dr_mid, l_percent_dr_hi;
     
@@ -112,6 +111,14 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
         
         gbc.gridy++;
         gbc.gridx = 0;
+        this.add(new JLabel("Max. random TX delay (ms)"), gbc);
+        gbc.gridx++;
+        tx_rnd_delay = new JSpinner(new SpinnerNumberModel(200, 0, 500, 1));
+        tx_rnd_delay.addChangeListener(this);
+        this.add(tx_rnd_delay, gbc);
+        
+        gbc.gridy++;
+        gbc.gridx = 0;
         gbc.gridwidth = 2;
         JButton btn_ok = new JButton("Ok");
         btn_ok.addActionListener(this);
@@ -136,6 +143,10 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
     
     public int getGuiScale() {
         return (int)gui_scale.getValue();
+    }
+    
+    public int getMaxTXDelay() {
+        return (int)tx_rnd_delay.getValue();
     }
 
     @Override

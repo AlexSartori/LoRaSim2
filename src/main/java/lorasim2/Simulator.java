@@ -33,12 +33,7 @@ class SimulationEvent {
     }
     
     public static Comparator<SimulationEvent> getComparator() {
-        return new Comparator<SimulationEvent>() {
-            @Override
-            public int compare(SimulationEvent t, SimulationEvent t1) {
-                return (int)(t.event_time - t1.event_time);
-            }
-        };
+        return (SimulationEvent t, SimulationEvent t1) -> (int)(t.event_time - t1.event_time);
     }
 }
 
@@ -52,8 +47,8 @@ class LoRaLink {
 }
 
 public class Simulator {
+    private SimConfig config;
     private float time_ms;
-    private int payload_size;
     private ArrayList<LoRaNode> nodes;
     private ArrayList<LoRaGateway> gateways;
     private HashMap<LoRaLink, LoRaMarkovModel> link_models;
@@ -81,16 +76,13 @@ public class Simulator {
         return (ArrayList<LoRaGateway>)gateways.clone();
     }
     
-    public void setPayloadSize(int ps) {
-        this.payload_size = ps;
-    }
-    
     public void resetSimulation() {
         time_ms = 0;
         nodes.clear();
         gateways.clear();
         link_models.clear();
         events_queue.clear();
+        config = null;
     }
     
     public void addNode(LoRaNode node) {
@@ -116,11 +108,12 @@ public class Simulator {
         return link_models.get(link);
     }
     
-    public SimulationResults runSimulation(int duration) {
+    public SimulationResults runSimulation(SimConfig conf) {
+        this.config = conf;
         SimulationResults result = new SimulationResults();
         
         events_queue.add(new SimulationEvent(null, 0, EventType.SIMULATION_START));
-        events_queue.add(new SimulationEvent(null, duration, EventType.SIMULATION_END));
+        events_queue.add(new SimulationEvent(null, config.sim_duration_ms, EventType.SIMULATION_END));
         
         while (events_queue.size() > 0) {
             SimulationEvent curr_event = events_queue.remove();
@@ -164,14 +157,12 @@ public class Simulator {
     }
     
     private void _scheduleNextTransmission(LoRaNode n) {
-        if (RNG.nextFloat() <= n.tx_prob)
-            events_queue.add(
-                new SimulationEvent(n, this.time_ms, EventType.TX_START)
-            );
-        else        
-            events_queue.add(
-                new SimulationEvent(n, this.time_ms + _getPacketAirtime(n.DR), EventType.NO_TX_END)
-            );    
+        float tx_time = this.time_ms + RNG.nextInt(config.tx_max_delay);
+        EventType et = (RNG.nextFloat() <= n.tx_prob) ? EventType.TX_START : EventType.NO_TX_END;
+        
+        events_queue.add(
+            new SimulationEvent(n, tx_time, et)
+        );
     }
     
     private void _transmitPacket(LoRaNode n) {
@@ -202,7 +193,7 @@ public class Simulator {
         int SF = new int[]{12, 11, 10, 9, 8, 7, 7}[DR]; // Spreading Factor
         double T_sym = Math.pow(2, SF) / BW; // Time for a symbol (ms)
         double bitrate = SF * (1/T_sym) * (4f/(4+CR));
-        double time_on_air = this.payload_size * 8 * bitrate;
+        double time_on_air = config.payload_size * 8 * bitrate;
         return (float)time_on_air;
     }
 }
