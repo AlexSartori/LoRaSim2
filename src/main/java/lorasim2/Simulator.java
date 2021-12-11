@@ -53,6 +53,7 @@ public class Simulator {
     private ArrayList<LoRaGateway> gateways;
     private HashMap<LoRaLink, LoRaMarkovModel> link_models;
     private PriorityQueue<SimulationEvent> events_queue;
+    private HashMap<LoRaNode, Float> open_transmissions;
     private final Random RNG;
     
     public Simulator() {
@@ -60,6 +61,7 @@ public class Simulator {
         gateways = new ArrayList<>();
         link_models = new HashMap<>();
         events_queue = new PriorityQueue<>(SimulationEvent.getComparator());
+        open_transmissions = new HashMap<>();
         RNG = new Random();
         resetSimulation();
     }
@@ -82,6 +84,7 @@ public class Simulator {
         gateways.clear();
         link_models.clear();
         events_queue.clear();
+        open_transmissions.clear();
         config = null;
     }
     
@@ -130,11 +133,13 @@ public class Simulator {
                     break;
                 case TX_START:
                     _simLog("Beginning TX for node #" + curr_event.node.id);
+                    open_transmissions.put(curr_event.node, time_ms);
                     result.begin_tx(curr_event.node, time_ms);
                     _transmitPacket(curr_event.node);
                     break;
                 case TX_END:
                     _simLog("Ended TX for node #" + curr_event.node.id);
+                    open_transmissions.remove(curr_event.node);
                     result.end_tx(curr_event.node, time_ms, true);
                     _scheduleNextTransmission(curr_event.node);
                     break;
@@ -142,12 +147,15 @@ public class Simulator {
                     _scheduleNextTransmission(curr_event.node);
                     break;
                 case RX_START:
+                    _simLog("Beginning RX for node #" + curr_event.node.id);
                     result.begin_rx(curr_event.node, time_ms);
                     break;
                 case RX_END_OK:
+                    _simLog("Ended RX (SUCC) for node #" + curr_event.node.id);
                     result.end_rx(curr_event.node, time_ms, true);
                     break;
                 case RX_END_FAIL:
+                    _simLog("Ended RX (FAIL) for node #" + curr_event.node.id);
                     result.end_rx(curr_event.node, time_ms, false);
                     break;
             }
