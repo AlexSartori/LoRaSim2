@@ -201,7 +201,7 @@ public class Simulator {
         int SF = new int[]{12, 11, 10, 9, 8, 7, 7}[DR]; // Spreading Factor
         double T_sym = Math.pow(2, SF) / BW; // Time for a symbol (ms)
         double bitrate = SF * (1/T_sym) * (4f/(4+CR));
-        double time_on_air = config.payload_size * 8 * bitrate;
+        double time_on_air = config.payload_size * 8 / bitrate;
         return (float)time_on_air;
     }
 }
