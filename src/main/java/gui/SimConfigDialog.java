@@ -8,21 +8,16 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 /**
  * @author alex
  */
-public class SimConfigDialog extends JDialog implements ActionListener, ChangeListener {
+public class SimConfigDialog extends JDialog implements ActionListener {
     private MainWindow parent;
     private JSpinner n_gateways, n_nodes, sim_duration, gui_scale, payload_size, tx_rnd_delay;
-    private JSlider percent_dr_low, percent_dr_mid, percent_dr_hi;
-    private JLabel l_percent_dr_low, l_percent_dr_mid, l_percent_dr_hi;
-    
+     
     public SimConfigDialog(MainWindow parent) {
         super();
         this.initUI();
@@ -62,43 +57,9 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
         
         gbc.gridy++;
         gbc.gridx = 0;
-        this.add(new JLabel("Percentage of nodes with low DR:"), gbc);
-        gbc.gridx++;
-        percent_dr_low = new JSlider(0, 100, 50);
-        percent_dr_low.addChangeListener(this);
-        this.add(percent_dr_low, gbc);
-        gbc.gridx++;
-        l_percent_dr_low = new JLabel(String.format("%d%%", percent_dr_low.getValue()));
-        this.add(l_percent_dr_low, gbc);
-        
-        gbc.gridy++;
-        gbc.gridx = 0;
-        this.add(new JLabel("Percentage of nodes with medium DR:"), gbc);
-        gbc.gridx++;
-        percent_dr_mid = new JSlider(0, 100, 20);
-        percent_dr_mid.addChangeListener(this);
-        this.add(percent_dr_mid, gbc);
-        gbc.gridx++;
-        l_percent_dr_mid = new JLabel(String.format("%d%%", percent_dr_mid.getValue()));
-        this.add(l_percent_dr_mid, gbc);
-        
-        gbc.gridy++;
-        gbc.gridx = 0;
-        this.add(new JLabel("Percentage of nodes with high DR:"), gbc);
-        gbc.gridx++;
-        percent_dr_hi = new JSlider(0, 100, 30);
-        percent_dr_hi.addChangeListener(this);
-        this.add(percent_dr_hi, gbc);
-        gbc.gridx++;
-        l_percent_dr_hi = new JLabel(String.format("%d%%", percent_dr_hi.getValue()));
-        this.add(l_percent_dr_hi, gbc);
-        
-        gbc.gridy++;
-        gbc.gridx = 0;
         this.add(new JLabel("Payload size (bytes):"), gbc);
         gbc.gridx++;
         payload_size = new JSpinner(new SpinnerNumberModel(8, 1, 64, 1));
-        payload_size.addChangeListener(this);
         this.add(payload_size, gbc);
         
         gbc.gridy++;
@@ -106,7 +67,6 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
         this.add(new JLabel("Interface scale (1 pixel = ? meters)"), gbc);
         gbc.gridx++;
         gui_scale = new JSpinner(new SpinnerNumberModel(2, 0, 50, 1));
-        gui_scale.addChangeListener(this);
         this.add(gui_scale, gbc);
         
         gbc.gridy++;
@@ -114,7 +74,6 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
         this.add(new JLabel("Max. random TX delay (ms)"), gbc);
         gbc.gridx++;
         tx_rnd_delay = new JSpinner(new SpinnerNumberModel(200, 0, 500, 1));
-        tx_rnd_delay.addChangeListener(this);
         this.add(tx_rnd_delay, gbc);
         
         gbc.gridy++;
@@ -157,20 +116,5 @@ public class SimConfigDialog extends JDialog implements ActionListener, ChangeLi
                 new ActionEvent(this, 0, "conf-sim-ok")
             );
         }
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent ce) {
-        JSlider source = (JSlider)ce.getSource();
-        String txt = String.format("%d%%", source.getValue());
-        
-        if (source == percent_dr_low)
-            l_percent_dr_low.setText(txt);
-        else if (source == percent_dr_mid)
-            l_percent_dr_mid.setText(txt);
-        else if (source == percent_dr_hi)
-            l_percent_dr_hi.setText(txt);
-        else
-            System.err.println("Unknown source in JSlider ChangeListener");
     }
 }
