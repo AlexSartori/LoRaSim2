@@ -17,7 +17,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import lorasim2.LoRaGateway;
 import lorasim2.LoRaMarkovModel;
-import lorasim2.LoRaModelFactory;
 import lorasim2.LoRaNode;
 import lorasim2.Simulator;
 

@@ -98,6 +98,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
                         System.out.println("[Main]: Warning: no model found for nodes: " + gw.id + " --> " + n.id);
                 } catch (Exception e) {
                     System.err.println("[Main]: Failed to set model for link: " + gw.id + " <--> " + n.id);
+                    e.printStackTrace();
                 }
             });
         });

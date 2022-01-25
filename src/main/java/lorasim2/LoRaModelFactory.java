@@ -21,7 +21,7 @@ public class LoRaModelFactory {
         
         try {
             ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-            File archive = new File(classLoader.getResource("models_v1.zip").toURI());
+            File archive = new File(classLoader.getResource("models_v2.zip").toURI());
             ZipInputStream zis = new ZipInputStream(new FileInputStream(archive));
             
             for (ZipEntry ze = zis.getNextEntry(); ze != null; ze = zis.getNextEntry()) {
@@ -41,6 +41,7 @@ public class LoRaModelFactory {
                     Float.parseFloat(s.value("pr_Int"))
                 );
                 models.add(m_model);
+                System.out.println("[ModelFactory] Loaded model from file: " + ze.getName());
             }
         } catch (IOException ex) {
             System.err.println("[ModelFactory]: Error loading models: " + ex.getMessage());
