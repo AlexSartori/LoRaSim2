@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -24,7 +25,7 @@ import org.knowm.xchart.style.markers.SeriesMarkers;
  * @author alex
  */
 public class ResultsWindow extends JFrame {
-    final int CHART_WIDTH = 500;
+    final int CHART_WIDTH = 800;
     JScrollPane scrollPane;
     JPanel contentPanel;
     GridBagConstraints gbc;
@@ -88,35 +89,10 @@ public class ResultsWindow extends JFrame {
                 new float[]{ pkt.start_ms, pkt.end_ms },
                 new float[]{ pkt.src.id, pkt.src.id }
             ).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(pkt.successful ? Color.green : Color.red)
-            .setLineWidth(3).setLineColor(pkt.successful ? Color.green : Color.red);
+            .setLineWidth(3).setLineColor(pkt.successful ? Color.green : Color.red).setLineStyle(new BasicStroke());
         }
         
         chart.getStyler().setLegendVisible(false);
         return chart;
     }
-    
-    /*private void testChart() {
-        for (int i = 0; i < 2; i++) {
-            XYChart chart = new XYChartBuilder().title("Test Chart").width(500).height(300).build();
-            chart.addSeries(
-                "Series 1",
-                new int[] {0, 1},
-                new int[] {1, 1}
-            ).setMarkerColor(Color.green).setMarker(SeriesMarkers.CIRCLE).setLineWidth(3).setLineColor(Color.green);
-            chart.addSeries("Series 2",
-                new double[] {4.2f, 6},
-                new double[] {1, 1}
-            ).setMarkerColor(Color.green).setMarker(SeriesMarkers.CIRCLE).setLineWidth(3).setLineColor(Color.green);
-            chart.addSeries("Series 3",
-                new double[] {2, 3},
-                new double[] {1, 1}
-            ).setMarkerColor(Color.red).setMarker(SeriesMarkers.CIRCLE).setLineWidth(3).setLineColor(Color.red);
-            chart.getStyler().setLegendVisible(false);
-
-            JPanel chartPanel = new XChartPanel<>(chart);
-            
-            gbc.gridy++;
-            contentPanel.add(chartPanel, gbc);
-        }
-    }*/
 }
