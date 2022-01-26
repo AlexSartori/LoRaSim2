@@ -8,22 +8,15 @@ import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import lorasim2.LoRaNode;
 import lorasim2.SimulationResults;
 import lorasim2.SimulationResults.Packet;
-import org.knowm.xchart.HeatMapChart;
-import org.knowm.xchart.HeatMapChartBuilder;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.internal.chartpart.RenderableSeries;
-import org.knowm.xchart.internal.series.MarkerSeries;
-import org.knowm.xchart.style.markers.Marker;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
 /**
@@ -54,47 +47,55 @@ public class ResultsWindow extends JFrame {
         
         /* Scroll pane ------------------------------------------------------ */
         scrollPane = new JScrollPane(contentPanel);
-        scrollPane.setHorizontalScrollBarPolicy(scrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setHorizontalScrollBarPolicy(scrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setVerticalScrollBarPolicy(scrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         this.add(scrollPane);
     }
     
-    public void plot(SimulationResults r) {
-        HashMap<LoRaNode, ArrayList<Packet>> data = r.getTransmissions();
-        XYChart transmissions = new XYChartBuilder()
-            .title("Transmissions").width(CHART_WIDTH).height(300)
-            .xAxisTitle("Time (ms)").yAxisTitle("Node ID")
-            .build();
-        
-        for (Entry<LoRaNode, ArrayList<Packet>> row : data.entrySet()) {
-            int id = row.getKey().id;
-            int pkt_id = 0;
-            
+    public void showResults(SimulationResults r) {
+        HashMap<LoRaNode, ArrayList<Packet>> rx_data = new HashMap<>();
+
+        for (Entry<LoRaNode, ArrayList<Packet>> row : r.getTransmissions().entrySet()) {
             for (Packet p : row.getValue()) {
-                transmissions.addSeries(
-                    "Node #" + id + " - Packet #" + pkt_id++,
-                    new float[]{ p.start_ms, p.end_ms },
-                    new float[]{ id, id }
-                ).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(p.successful ? Color.green : Color.red)
-                .setLineWidth(3).setLineColor(p.successful ? Color.green : Color.red);
+                if (!rx_data.containsKey(p.dst))
+                    rx_data.put(p.dst, new ArrayList<>());
+                rx_data.get(p.dst).add(p);
             }
         }
         
-        transmissions.getStyler().setLegendVisible(false);
-        JPanel chartPanel = new XChartPanel<>(transmissions);
-
-        gbc.gridy++;
-        contentPanel.add(chartPanel, gbc);
-        scrollPane.setViewportView(contentPanel);
+        for (Entry<LoRaNode, ArrayList<Packet>> row : rx_data.entrySet()) {
+            XYChart c = createNodeReceptionsPlot(row.getKey(), row.getValue());
+            JPanel p = new XChartPanel(c);
+            
+            gbc.gridy++;
+            contentPanel.add(p, gbc);
+        }
         
-        testChart();
-        testChart();
-        testChart();
-        testChart();
+        this.setVisible(true);
     }
     
-    private void testChart() {
+    private XYChart createNodeReceptionsPlot(LoRaNode n, ArrayList<Packet> data) {
+        XYChart chart = new XYChartBuilder()
+            .title("Node #" + n.id + " RX data").width(CHART_WIDTH).height(300)
+            .xAxisTitle("Time (ms)").yAxisTitle("Source node ID")
+            .build();
+        
+        int pkt_id = 0;
+        for (Packet pkt : data) {
+            chart.addSeries(
+                "Node #" + n.id + " - Packet #" + pkt_id++,
+                new float[]{ pkt.start_ms, pkt.end_ms },
+                new float[]{ pkt.src.id, pkt.src.id }
+            ).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(pkt.successful ? Color.green : Color.red)
+            .setLineWidth(3).setLineColor(pkt.successful ? Color.green : Color.red);
+        }
+        
+        chart.getStyler().setLegendVisible(false);
+        return chart;
+    }
+    
+    /*private void testChart() {
         for (int i = 0; i < 2; i++) {
             XYChart chart = new XYChartBuilder().title("Test Chart").width(500).height(300).build();
             chart.addSeries(
@@ -117,5 +118,5 @@ public class ResultsWindow extends JFrame {
             gbc.gridy++;
             contentPanel.add(chartPanel, gbc);
         }
-    }
+    }*/
 }

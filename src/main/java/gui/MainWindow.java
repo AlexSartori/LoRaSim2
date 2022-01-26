@@ -122,7 +122,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         
         SimulationResults res = sim.runSimulation(sim_conf);
         res_window = new ResultsWindow();
-        res_window.plot(res);
+        res_window.showResults(res);
         res_window.setVisible(true);
     }
 
