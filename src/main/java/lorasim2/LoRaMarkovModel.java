@@ -22,7 +22,7 @@ public class LoRaMarkovModel {
         interference_percent = 20;
     }
     
-    public MarkovState getSCurrentState() {
+    public MarkovState getCurrentState() {
         return current_state;
     }
     

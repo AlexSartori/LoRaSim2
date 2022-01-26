@@ -14,11 +14,9 @@ enum EventType {
     SIMULATION_START,
     SIMULATION_END,
     TX_START,
-    TX_END,
-    NO_TX_END,
-    RX_START,
-    RX_END_OK,
-    RX_END_FAIL
+    TX_END_OK,
+    TX_END_FAIL,
+    NO_TX_END
 };
 
 class SimulationEvent {
@@ -133,30 +131,27 @@ public class Simulator {
                     break;
                 case TX_START:
                     _simLog("Beginning TX for node #" + curr_event.node.id);
+                    
                     open_transmissions.put(curr_event.node, time_ms);
-                    result.begin_tx(curr_event.node, time_ms);
-                    _transmitPacket(curr_event.node);
+                    for (LoRaLink l : link_models.keySet())
+                        if (l.n1 == curr_event.node) {
+                            result.begin_transmission(l, time_ms);
+                            _transmitPacket(l);
+                        }
                     break;
-                case TX_END:
+                case TX_END_OK:
+                case TX_END_FAIL:
                     _simLog("Ended TX for node #" + curr_event.node.id);
                     open_transmissions.remove(curr_event.node);
-                    result.end_tx(curr_event.node, time_ms, true);
+                    
+                    for (LoRaLink l : link_models.keySet())
+                        if (l.n1 == curr_event.node)
+                            result.end_transmission(l, time_ms, curr_event.type == EventType.TX_END_OK);
+                    
                     _scheduleNextTransmission(curr_event.node);
                     break;
                 case NO_TX_END:
                     _scheduleNextTransmission(curr_event.node);
-                    break;
-                case RX_START:
-                    _simLog("Beginning RX for node #" + curr_event.node.id);
-                    result.begin_rx(curr_event.node, time_ms);
-                    break;
-                case RX_END_OK:
-                    _simLog("Ended RX (SUCC) for node #" + curr_event.node.id);
-                    result.end_rx(curr_event.node, time_ms, true);
-                    break;
-                case RX_END_FAIL:
-                    _simLog("Ended RX (FAIL) for node #" + curr_event.node.id);
-                    result.end_rx(curr_event.node, time_ms, false);
                     break;
             }
         }
@@ -173,26 +168,18 @@ public class Simulator {
         );
     }
     
-    private void _transmitPacket(LoRaNode n) {
-        float end_time = this.time_ms + _getPacketAirtime(n.DR);
-        
-        for (LoRaLink l : link_models.keySet()) {
-            if (l.n1 != n) continue;
-            
-            events_queue.add(new SimulationEvent(l.n2, this.time_ms, EventType.RX_START));
-            
-            LoRaMarkovModel m = link_models.get(l);
-            m.nextState(RNG);
-            
-            events_queue.add(
-                new SimulationEvent(
-                    l.n2, end_time,
-                    m.getSCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS ? EventType.RX_END_OK : EventType.RX_END_FAIL
-                )
-            );
-        }
-        
-        events_queue.add(new SimulationEvent(n, end_time, EventType.TX_END));
+    private void _transmitPacket(LoRaLink l) {
+        float end_time = this.time_ms + _getPacketAirtime(l.n1.DR);
+
+        LoRaMarkovModel m = link_models.get(l);
+        m.nextState(RNG);
+
+        events_queue.add(
+            new SimulationEvent(
+                l.n1, end_time,
+                m.getCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS ? EventType.TX_END_OK : EventType.TX_END_FAIL
+            )
+        );
     }
     
     private float _getPacketAirtime(int DR) {
