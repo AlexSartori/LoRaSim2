@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -29,51 +30,40 @@ import org.knowm.xchart.style.markers.SeriesMarkers;
  *
  * @author alex
  */
-public class ResultsPanel extends JScrollPane {
+public class ResultsWindow extends JFrame {
+    final int CHART_WIDTH = 500;
+    JScrollPane scrollPane;
     JPanel contentPanel;
     GridBagConstraints gbc;
     
-    public ResultsPanel() {
-        super();
-        setBorder(BorderFactory.createTitledBorder("Simulation Results"));
-        setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-        setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
-        getVerticalScrollBar().setUnitIncrement(16);
+    public ResultsWindow() {
+        /* Init frame ------------------------------------------------------- */
+        super("Simulation Results");
+        setMinimumSize(new Dimension(CHART_WIDTH + 30, 400));
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
+        /* Panel with main layout ------------------------------------------- */
         contentPanel = new JPanel();
-        contentPanel.setMaximumSize(new Dimension(500, 1000));
-        contentPanel.setMinimumSize(new Dimension(500, 100));
-        // contentPanel.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         contentPanel.setLayout(new GridBagLayout());
-        this.add(contentPanel);
         
         gbc = new GridBagConstraints();
-        // gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.PAGE_START;
         gbc.insets = new Insets(5, 0, 5, 0);
         gbc.gridx = 0;
         gbc.gridy = 0;
         
-        JLabel l = new JLabel("Run a simulation to plot here the results");
-        contentPanel.add(l, gbc);
-        
-        this.setViewportView(contentPanel);
+        /* Scroll pane ------------------------------------------------------ */
+        scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setHorizontalScrollBarPolicy(scrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(scrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        this.add(scrollPane);
     }
     
-    @Override
-    public Dimension getMinimumSize() {
-      return new Dimension(500, 100);
-    }
-    
-    @Override
-    public Dimension getPreferredSize() {
-      return new Dimension(500, 800);
-    }
-
     public void plot(SimulationResults r) {
         HashMap<LoRaNode, ArrayList<Packet>> data = r.getTransmissions();
         XYChart transmissions = new XYChartBuilder()
-            .title("Transmissions").width(470).height(300)
+            .title("Transmissions").width(CHART_WIDTH).height(300)
             .xAxisTitle("Time (ms)").yAxisTitle("Node ID")
             .build();
         
@@ -96,7 +86,12 @@ public class ResultsPanel extends JScrollPane {
 
         gbc.gridy++;
         contentPanel.add(chartPanel, gbc);
-        this.setViewportView(contentPanel);
+        scrollPane.setViewportView(contentPanel);
+        
+        testChart();
+        testChart();
+        testChart();
+        testChart();
     }
     
     private void testChart() {
@@ -119,7 +114,6 @@ public class ResultsPanel extends JScrollPane {
 
             JPanel chartPanel = new XChartPanel<>(chart);
             
-            //chartPanel.setSize(300, 150);
             gbc.gridy++;
             contentPanel.add(chartPanel, gbc);
         }

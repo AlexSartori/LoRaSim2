@@ -27,7 +27,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
     private final SimConfigDialog sim_config;
     private JToolBar toolbar;
     private CanvasPanel canvas;
-    private ResultsPanel res_panel;
+    private ResultsWindow res_window;
     
     public MainWindow() {
         super();
@@ -58,9 +58,9 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         this.add(canvas, BorderLayout.CENTER);
         
         /* Results Panel ---------------------------------------------------- */
-        res_panel = new ResultsPanel();
-        res_panel.setMinimumSize(new Dimension(500, 800));
-        this.add(res_panel, BorderLayout.EAST);
+        // res_panel = new ResultsWindow();
+        // res_panel.setMinimumSize(new Dimension(500, 800));
+        // this.add(res_panel, BorderLayout.EAST);
     }
     
     private void _createSimulation(int n_nodes, int n_gateways) {
@@ -121,7 +121,9 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         });
         
         SimulationResults res = sim.runSimulation(sim_conf);
-        res_panel.plot(res);
+        res_window = new ResultsWindow();
+        res_window.plot(res);
+        res_window.setVisible(true);
     }
 
     @Override

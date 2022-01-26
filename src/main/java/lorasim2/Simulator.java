@@ -103,7 +103,7 @@ public class Simulator {
             throw new Exception("Unknown node: " + n2.id);
         
         link_models.put(new LoRaLink(n1, n2), m);
-        _simLog("[Simulator]: Added link " + n1.id + " <--> " + n2.id);
+        _simLog("Added link " + n1.id + " <--> " + n2.id);
     }
     
     public LoRaMarkovModel getLinkModel(LoRaNode n1, LoRaNode n2) {
