@@ -6,7 +6,7 @@ import java.util.HashMap;
 /**
  * @author alex
  */
-public class SimulationResults {
+public class SimulationStats {
     
     public class Packet {
         public LoRaNode src, dst;
@@ -25,7 +25,7 @@ public class SimulationResults {
     private HashMap<LoRaNode, ArrayList<Packet>> tx_data;
     private HashMap<LoRaNode, Float> tx_start_times;
     
-    public SimulationResults() {
+    public SimulationStats() {
         tx_data = new HashMap<>();
         tx_start_times = new HashMap<>();
     }
@@ -34,18 +34,21 @@ public class SimulationResults {
         return tx_data;
     }
     
-    public void begin_transmission(LoRaLink link, float time_ms) {
-        tx_start_times.put(link.n1, time_ms);
+    public void beginTransmission(LoRaLink link, float time_ms) {
+        tx_start_times.put(link.src, time_ms);
     }
     
-    public void end_transmission(LoRaLink link, float time_ms, boolean succ) {
-        if (!tx_data.containsKey(link.n1))
-            tx_data.put(link.n1, new ArrayList<>());
+    public void endTransmission(LoRaLink link, float time_ms, boolean succ) {
+        if (!tx_data.containsKey(link.src))
+            tx_data.put(link.src, new ArrayList<>());
         
-        float start = tx_start_times.get(link.n1);
-        tx_data.get(link.n1).add(
-            new Packet(link.n1, link.n2, start, time_ms, succ)
+        float start = tx_start_times.get(link.src);
+        tx_data.get(link.src).add(
+            new Packet(link.src, link.dst, start, time_ms, succ)
         );
     }
     
+    public float getRXSuperposition(LoRaNode n, float start_ms, float end_ms) {
+        return 0;
+    }
 }

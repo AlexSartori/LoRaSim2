@@ -16,7 +16,7 @@ import lorasim2.LoRaMarkovModel;
 import lorasim2.LoRaModelFactory;
 import lorasim2.LoRaNode;
 import lorasim2.SimConfig;
-import lorasim2.SimulationResults;
+import lorasim2.SimulationStats;
 import lorasim2.Simulator;
 
 /**
@@ -91,7 +91,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         gateways.forEach(gw -> {
             nodes.forEach(n -> {
                 try {
-                    LoRaMarkovModel model = LoRaModelFactory.getLinkModel(gw, n, canvas.calcDistance(gw, n));
+                    LoRaMarkovModel model = LoRaModelFactory.getLinkModel(gw, n, canvas.calcDistance(gw, n), 0);
                     if (model != null)
                         sim.setLinkModel(gw, n, model);
                     else
@@ -109,7 +109,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
                     return;
                 
                 try {
-                    LoRaMarkovModel model = LoRaModelFactory.getLinkModel(n1, n2, canvas.calcDistance(n1, n2));
+                    LoRaMarkovModel model = LoRaModelFactory.getLinkModel(n1, n2, canvas.calcDistance(n1, n2), 0);
                     if (model != null)
                         sim.setLinkModel(n1, n2, model);
                     else
@@ -120,7 +120,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
             });
         });
         
-        SimulationResults res = sim.runSimulation(sim_conf);
+        SimulationStats res = sim.runSimulation(sim_conf);
         res_window = new ResultsWindow();
         res_window.showResults(res);
         res_window.setVisible(true);

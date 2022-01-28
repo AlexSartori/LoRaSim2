@@ -13,8 +13,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import lorasim2.LoRaNode;
-import lorasim2.SimulationResults;
-import lorasim2.SimulationResults.Packet;
+import lorasim2.SimulationStats;
+import lorasim2.SimulationStats.Packet;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
@@ -54,7 +54,7 @@ public class ResultsWindow extends JFrame {
         this.add(scrollPane);
     }
     
-    public void showResults(SimulationResults r) {
+    public void showResults(SimulationStats r) {
         HashMap<LoRaNode, ArrayList<Packet>> rx_data = new HashMap<>();
 
         for (Entry<LoRaNode, ArrayList<Packet>> row : r.getTransmissions().entrySet()) {

@@ -50,7 +50,7 @@ public class LoRaModelFactory {
         }
     }
     
-    public static LoRaMarkovModel getLinkModel(LoRaNode n1, LoRaNode n2, float target_distance) {
+    public static LoRaMarkovModel getLinkModel(LoRaNode n1, LoRaNode n2, float target_distance, float interf) {
         if (models == null)
             _loadModels();
         
