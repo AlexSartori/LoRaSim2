@@ -49,6 +49,30 @@ public class SimulationStats {
     }
     
     public float getRXSuperposition(LoRaNode n, float start_ms, float end_ms) {
-        return 0;
+        HashMap<Packet, Float> packets = new HashMap<>();
+        
+        for (LoRaNode src : tx_data.keySet()) {
+            if (src == n)  continue;
+            
+            for (Packet p : tx_data.get(src)) {
+                if (p.dst != n || p.end_ms < start_ms) continue;
+                
+                if (p.start_ms >= start_ms || p.end_ms <= end_ms) {
+                    float superposition = Math.min(p.end_ms, end_ms) - Math.max(p.start_ms, start_ms);
+                    superposition /= end_ms - start_ms;
+                    packets.put(p, superposition);
+                }
+            }
+        }
+        
+        System.out.println("RX to node #" + n.id + " overlaps with " + packets.size() + " other packets");
+        
+        float max_overlap = 0;
+        for (float s : packets.values())
+            if (s > max_overlap)
+                max_overlap = s;
+        
+        System.out.println("   -> Max overlap is " + (int)(max_overlap*100) + "%");
+        return max_overlap;
     }
 }

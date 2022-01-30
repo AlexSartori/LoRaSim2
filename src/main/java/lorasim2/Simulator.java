@@ -14,7 +14,7 @@ enum EventType {
     SIMULATION_START,
     SIMULATION_END,
     TX_START,
-    TX_END_OK,
+    TX_END,
     TX_END_FAIL,
     NO_TX_END
 };
@@ -32,6 +32,14 @@ class SimulationEvent {
     
     public static Comparator<SimulationEvent> getComparator() {
         return (SimulationEvent t, SimulationEvent t1) -> (int)(t.event_time - t1.event_time);
+    }
+}
+
+class TXEndEvent extends SimulationEvent {
+    public final float tx_start_time;
+    public TXEndEvent(LoRaLink link, float time, float tx_start) {
+        super(link, time, EventType.TX_END);
+        tx_start_time = tx_start;
     }
 }
 
@@ -125,35 +133,33 @@ public class Simulator {
             switch (curr_event.type) {
                 case SIMULATION_START:
                     _simLog("Simulation started");
-                    nodes.forEach(n -> { _scheduleNextTransmission(n); });
+                    nodes.forEach(n -> { _scheduleNextNodeTransmission(n); });
                     break;
                 case SIMULATION_END:
                     _simLog("Simulation ended");
                     events_queue.clear();
                     break;
                 case TX_START:
-                    _simLog("Beginning TX for node #" + curr_event.link.src);
+                    _simLog("Beginning TX for node #" + curr_event.link.src.id);
                     
                     open_transmissions.put(curr_event.link.src, time_ms);
                     for (LoRaLink l : link_models.keySet())
                         if (l.src == curr_event.link.src) {
                             stats.beginTransmission(l, time_ms);
-                            _transmitPacket(l);
+                            _beginNodeTX(l);
                         }
                     break;
-                case TX_END_OK:
-                case TX_END_FAIL:
-                    _simLog("Ended TX for link " + curr_event.link.src + " <-> " + curr_event.link.dst);
+                case TX_END:
+                    _simLog("Ended TX for link " + curr_event.link.src.id + " <-> " + curr_event.link.dst.id);
                     
-                    if (open_transmissions.remove(curr_event.link.src) == null)
+                    if (open_transmissions.remove(curr_event.link.src) != null)
                         // Only do this once for each TX_START (= many TX_ENDs)
-                        _scheduleNextTransmission(curr_event.link.src);
+                        _scheduleNextNodeTransmission(curr_event.link.src);
                     
-                    stats.endTransmission(curr_event.link, time_ms, curr_event.type == EventType.TX_END_OK);
-                    
+                    _endNodeTX((TXEndEvent)curr_event);
                     break;
                 case NO_TX_END:
-                    _scheduleNextTransmission(curr_event.link.src);
+                    _scheduleNextNodeTransmission(curr_event.link.src);
                     break;
             }
         }
@@ -161,7 +167,7 @@ public class Simulator {
         return stats;
     }
     
-    private void _scheduleNextTransmission(LoRaNode n) {
+    private void _scheduleNextNodeTransmission(LoRaNode n) {
         float tx_time = this.time_ms + RNG.nextInt(config.tx_max_delay);
         EventType et = (RNG.nextFloat() <= n.tx_prob) ? EventType.TX_START : EventType.NO_TX_END;
         
@@ -170,19 +176,22 @@ public class Simulator {
         );
     }
     
-    private void _transmitPacket(LoRaLink l) {
+    private void _beginNodeTX(LoRaLink l) {
         float end_time = this.time_ms + _getPacketAirtime(l.src.DR);
-        float interference = stats.getRXSuperposition(l.dst, this.time_ms, end_time);
+        
+        events_queue.add(
+            new TXEndEvent(l, end_time, this.time_ms)
+        );
+    }
+    
+    private void _endNodeTX(TXEndEvent e) {
+        float interference = stats.getRXSuperposition(e.link.dst, e.tx_start_time, this.time_ms);
 
-        LoRaMarkovModel m_base = link_models.get(l);
-        LoRaMarkovModel m = LoRaModelFactory.getLinkModel(l.src, l.dst, m_base.distance_m, interference);
+        LoRaMarkovModel m_base = link_models.get(e.link);
+        LoRaMarkovModel m = LoRaModelFactory.getLinkModel(e.link.src, e.link.dst, m_base.distance_m, interference);
         m.nextState(RNG);
         
-        events_queue.add(new SimulationEvent(
-                l, end_time,
-                m.getCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS ? EventType.TX_END_OK : EventType.TX_END_FAIL
-            )
-        );
+        stats.endTransmission(e.link, time_ms, m.getCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS);
     }
     
     private float _getPacketAirtime(int DR) {
