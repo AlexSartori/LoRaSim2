@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -56,11 +55,6 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         /* Canvas ----------------------------------------------------------- */
         canvas = new CanvasPanel(this.sim, this.sim_config);
         this.add(canvas, BorderLayout.CENTER);
-        
-        /* Results Panel ---------------------------------------------------- */
-        // res_panel = new ResultsWindow();
-        // res_panel.setMinimumSize(new Dimension(500, 800));
-        // this.add(res_panel, BorderLayout.EAST);
     }
     
     private void _createSimulation(int n_nodes, int n_gateways) {
@@ -121,9 +115,11 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         });
         
         SimulationStats res = sim.runSimulation(sim_conf);
+        
+        System.out.println("[Main]: Preparing results...");
         res_window = new ResultsWindow();
         res_window.showResults(res);
-        res_window.setVisible(true);
+        System.out.println("    > Done");
     }
 
     @Override
