@@ -25,10 +25,10 @@ import org.knowm.xchart.style.markers.SeriesMarkers;
  * @author alex
  */
 public class ResultsWindow extends JFrame {
-    final int CHART_WIDTH = 800;
-    JScrollPane scrollPane;
-    JPanel contentPanel;
-    GridBagConstraints gbc;
+    private int CHART_WIDTH = 800;
+    private JScrollPane scrollPane;
+    private JPanel contentPanel;
+    private GridBagConstraints gbc;
     
     public ResultsWindow() {
         /* Init frame ------------------------------------------------------- */

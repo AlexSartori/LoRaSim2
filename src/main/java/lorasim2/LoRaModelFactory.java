@@ -41,7 +41,7 @@ public class LoRaModelFactory {
                     Float.parseFloat(s.value("pr_Int"))
                 );
                 models.add(m_model);
-                System.out.println("[ModelFactory] Loaded model from file: " + ze.getName());
+                // System.out.println("[ModelFactory] Loaded model from file: " + ze.getName());
             }
         } catch (IOException ex) {
             System.err.println("[ModelFactory]: Error loading models: " + ex.getMessage());
@@ -51,30 +51,57 @@ public class LoRaModelFactory {
     }
     
     public static LoRaMarkovModel getLinkModel(LoRaNode n1, LoRaNode n2, float target_distance, float interf) {
-        if (models == null)
-            _loadModels();
+        if (models == null) _loadModels();
+        if (n1.DR != -1 && n2.DR != -1 && n1.DR != n2.DR) return null;
         
-        if (n1.DR != -1 && n2.DR != -1 && n1.DR != n2.DR)
-            return null;
-        
+        /* Gather all models for the correct Datarate ----------------------- */
         int DR = n1 instanceof LoRaGateway ? n2.DR : n1.DR;
+        ArrayList<LoRaMarkovModel> candidates_by_DR = new ArrayList<>();
+        models.forEach(m -> { if (m.DR == DR) candidates_by_DR.add(m); });
         
-        ArrayList<LoRaMarkovModel> candidates = new ArrayList<>();
-        models.forEach(m -> { if (m.DR == DR) candidates.add(m); });
+        if (candidates_by_DR.size() == 0) {
+            System.err.println("[ModelFactory]: Warning: No candidates available for DR = " + DR);
+            return null;
+        }
         
-        if (candidates.size() == 0)
-            System.err.println("[ModelFactory]: No candidates for DR = " + DR);
+        /* Select only those models with the best matching distance --------- */
+        ArrayList<LoRaMarkovModel> candidates_by_dist = new ArrayList<>();
         
-        LoRaMarkovModel closest_model = null;
-        float smallest_delta = -1;
-        
-        for (LoRaMarkovModel m : candidates) {
-            if (smallest_delta == -1 || Math.abs(target_distance - m.distance_m) < smallest_delta) {
-                smallest_delta = Math.abs(target_distance - m.distance_m);
-                closest_model = m;
+        for (LoRaMarkovModel m : candidates_by_DR) {
+            if (candidates_by_dist.isEmpty())
+                candidates_by_dist.add(m);
+            else if (m.distance_m == candidates_by_dist.get(0).distance_m)
+                candidates_by_dist.add(m);
+            else {
+                float old_delta = Math.abs(target_distance - candidates_by_dist.get(0).distance_m);
+                float new_delta = Math.abs(target_distance - m.distance_m);
+                
+                if (new_delta < old_delta) {
+                    candidates_by_dist.clear();
+                    candidates_by_dist.add(m);
+                }
             }
         }
         
+        if (candidates_by_dist.size() == 0) {
+            System.err.println("[ModelFactory]: Warning: No candidates available for dist = " + target_distance);
+            return null;
+        }
+        
+        /* Select the model with the closest interference rate -------------- */
+        float closest_interf_delta = -1;
+        LoRaMarkovModel closest_model = null;
+        
+        for (LoRaMarkovModel m : candidates_by_dist) {
+            float new_delta = Math.abs(interf - m.interference_percent/100);
+            if (closest_interf_delta == -1 || new_delta < closest_interf_delta) {
+                closest_interf_delta = new_delta;
+                closest_model = m;
+            }
+        }
+        System.out.println("Returned model has interference delta = " + closest_interf_delta);
+        System.out.println("  Target interf: " + interf + "  /  Model interf: " + closest_model.interference_percent/100);
+            
         return closest_model;
     }
 }

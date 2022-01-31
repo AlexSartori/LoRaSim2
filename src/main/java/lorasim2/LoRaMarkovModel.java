@@ -19,7 +19,7 @@ public class LoRaMarkovModel {
         P = p;
         DR = dr;
         distance_m = (int)distance;
-        interference_percent = 20;
+        interference_percent = int_percent;
     }
     
     public MarkovState getCurrentState() {

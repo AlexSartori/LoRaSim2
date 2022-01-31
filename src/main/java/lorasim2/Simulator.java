@@ -46,6 +46,7 @@ class TXEndEvent extends SimulationEvent {
 class LoRaLink {
     public LoRaNode src, dst;
     public LoRaLink(LoRaNode a, LoRaNode b) { src = a; dst = b; }
+    
     @Override
     public boolean equals(Object l2) { return src.id == ((LoRaLink)l2).src.id && dst.id == ((LoRaLink)l2).dst.id; }
     @Override
@@ -56,11 +57,11 @@ public class Simulator {
     private SimConfig config;
     private SimulationStats stats;
     private float time_ms;
-    private ArrayList<LoRaNode> nodes;
-    private ArrayList<LoRaGateway> gateways;
-    private HashMap<LoRaLink, LoRaMarkovModel> link_models;
-    private PriorityQueue<SimulationEvent> events_queue;
-    private HashMap<LoRaNode, Float> open_transmissions;
+    private final ArrayList<LoRaNode> nodes;
+    private final ArrayList<LoRaGateway> gateways;
+    private final HashMap<LoRaLink, LoRaMarkovModel> link_models;
+    private final PriorityQueue<SimulationEvent> events_queue;
+    private final HashMap<LoRaNode, Float> open_transmissions;
     private final Random RNG;
     
     public Simulator() {
