@@ -13,8 +13,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import lorasim2.LoRaNode;
+import lorasim2.LoRaPacket;
 import lorasim2.SimulationStats;
-import lorasim2.SimulationStats.Packet;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
@@ -55,17 +55,17 @@ public class ResultsWindow extends JFrame {
     }
     
     public void showResults(SimulationStats r) {
-        HashMap<LoRaNode, ArrayList<Packet>> rx_data = new HashMap<>();
+        HashMap<LoRaNode, ArrayList<LoRaPacket>> rx_data = new HashMap<>();
 
-        for (Entry<LoRaNode, ArrayList<Packet>> row : r.getTransmissions().entrySet()) {
-            for (Packet p : row.getValue()) {
+        for (Entry<LoRaNode, ArrayList<LoRaPacket>> row : r.getTransmissions().entrySet()) {
+            for (LoRaPacket p : row.getValue()) {
                 if (!rx_data.containsKey(p.dst))
                     rx_data.put(p.dst, new ArrayList<>());
                 rx_data.get(p.dst).add(p);
             }
         }
         
-        for (Entry<LoRaNode, ArrayList<Packet>> row : rx_data.entrySet()) {
+        for (Entry<LoRaNode, ArrayList<LoRaPacket>> row : rx_data.entrySet()) {
             XYChart c = createNodeReceptionsPlot(row.getKey(), row.getValue());
             JPanel p = new XChartPanel(c);
             
@@ -76,14 +76,14 @@ public class ResultsWindow extends JFrame {
         this.setVisible(true);
     }
     
-    private XYChart createNodeReceptionsPlot(LoRaNode n, ArrayList<Packet> data) {
+    private XYChart createNodeReceptionsPlot(LoRaNode n, ArrayList<LoRaPacket> data) {
         XYChart chart = new XYChartBuilder()
             .title("Node #" + n.id + " RX data").width(CHART_WIDTH).height(300)
             .xAxisTitle("Time (ms)").yAxisTitle("Source node ID")
             .build();
         
         int pkt_id = 0;
-        for (Packet pkt : data) {
+        for (LoRaPacket pkt : data) {
             chart.addSeries(
                 "Node #" + n.id + " - Packet #" + pkt_id++,
                 new float[]{ pkt.start_ms, pkt.end_ms },

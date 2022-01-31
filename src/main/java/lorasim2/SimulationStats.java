@@ -7,22 +7,7 @@ import java.util.HashMap;
  * @author alex
  */
 public class SimulationStats {
-    
-    public class Packet {
-        public LoRaNode src, dst;
-        public float start_ms, end_ms;
-        public boolean successful;
-
-        public Packet(LoRaNode src, LoRaNode dst, float start, float end, boolean succ) {
-            this.src = src;
-            this.dst = dst;
-            start_ms = start;
-            end_ms = end;
-            successful = succ;
-        }
-    }
-    
-    private HashMap<LoRaNode, ArrayList<Packet>> tx_data;
+    private HashMap<LoRaNode, ArrayList<LoRaPacket>> tx_data;
     private HashMap<LoRaNode, Float> tx_start_times;
     
     public SimulationStats() {
@@ -30,7 +15,7 @@ public class SimulationStats {
         tx_start_times = new HashMap<>();
     }
     
-    public HashMap<LoRaNode, ArrayList<Packet>> getTransmissions() {
+    public HashMap<LoRaNode, ArrayList<LoRaPacket>> getTransmissions() {
         return tx_data;
     }
     
@@ -38,23 +23,23 @@ public class SimulationStats {
         tx_start_times.put(link.src, time_ms);
     }
     
-    public void endTransmission(LoRaLink link, float time_ms, boolean succ) {
+    public void endTransmission(LoRaLink link, float time_ms, boolean succ, int payload_size) {
         if (!tx_data.containsKey(link.src))
             tx_data.put(link.src, new ArrayList<>());
         
         float start = tx_start_times.get(link.src);
         tx_data.get(link.src).add(
-            new Packet(link.src, link.dst, start, time_ms, succ)
+            new LoRaPacket(link.src, link.dst, start, time_ms, succ, payload_size)
         );
     }
     
     public float getRXSuperposition(LoRaNode n, float start_ms, float end_ms) {
-        HashMap<Packet, Float> packets = new HashMap<>();
+        HashMap<LoRaPacket, Float> packets = new HashMap<>();
         
         for (LoRaNode src : tx_data.keySet()) {
             if (src == n)  continue;
             
-            for (Packet p : tx_data.get(src)) {
+            for (LoRaPacket p : tx_data.get(src)) {
                 if (p.dst != n || p.end_ms < start_ms) continue;
                 
                 if (p.start_ms >= start_ms || p.end_ms <= end_ms) {

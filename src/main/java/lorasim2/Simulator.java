@@ -43,16 +43,6 @@ class TXEndEvent extends SimulationEvent {
     }
 }
 
-class LoRaLink {
-    public LoRaNode src, dst;
-    public LoRaLink(LoRaNode a, LoRaNode b) { src = a; dst = b; }
-    
-    @Override
-    public boolean equals(Object l2) { return src.id == ((LoRaLink)l2).src.id && dst.id == ((LoRaLink)l2).dst.id; }
-    @Override
-    public int hashCode() { return src.hashCode() + dst.hashCode(); }
-}
-
 public class Simulator {
     private SimConfig config;
     private SimulationStats stats;
@@ -192,7 +182,7 @@ public class Simulator {
         LoRaMarkovModel m = LoRaModelFactory.getLinkModel(e.link.src, e.link.dst, m_base.distance_m, interference);
         m.nextState(RNG);
         
-        stats.endTransmission(e.link, time_ms, m.getCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS);
+        stats.endTransmission(e.link, time_ms, m.getCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS, config.payload_size);
     }
     
     private float _getPacketAirtime(int DR) {
