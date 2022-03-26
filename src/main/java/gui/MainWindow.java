@@ -14,6 +14,7 @@ import lorasim2.LoRaGateway;
 import lorasim2.LoRaMarkovModel;
 import lorasim2.LoRaModelFactory;
 import lorasim2.LoRaNode;
+import lorasim2.SimConfig;
 import lorasim2.SimulationStats;
 import lorasim2.Simulator;
 
@@ -22,7 +23,6 @@ import lorasim2.Simulator;
  */
 public class MainWindow extends javax.swing.JFrame implements ActionListener {
     private Simulator sim;
-    private final SimConfigDialog sim_config;
     private JToolBar toolbar;
     private CanvasPanel canvas;
     private ResultsWindow res_window;
@@ -30,7 +30,6 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
     public MainWindow() {
         super();
         sim = new Simulator();
-        sim_config = new SimConfigDialog(this);
         this.initUI();
     }
     
@@ -41,7 +40,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         this.setLayout(new BorderLayout());
         
         /* Toolbar ---------------------------------------------------------- */
-        JButton tb_newsim = new JButton("Configure Simulation");
+        JButton tb_newsim = new JButton("Run Simulation");
         tb_newsim.addActionListener(this);
         
         JPanel tb_panel = new JPanel(new FlowLayout());
@@ -52,24 +51,24 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         this.add(toolbar, BorderLayout.NORTH);
         
         /* Canvas ----------------------------------------------------------- */
-        canvas = new CanvasPanel(this.sim, this.sim_config);
+        canvas = new CanvasPanel(this.sim);
         this.add(canvas, BorderLayout.CENTER);
     }
     
-    private void _createSimulation(int n_nodes, int n_gateways) {
+    private void _createSimulation() {
         ArrayList<LoRaNode> nodes = new ArrayList<>();
         ArrayList<LoRaGateway> gateways = new ArrayList<>();
         Random rng = new Random();
         sim.resetSimulation();
         
-        for (int i = 0; i < n_nodes; i++) {
+        for (int i = 0; i < SimConfig.getInstance().n_nodes; i++) {
             int dr = rng.nextInt(4) * 2;
             LoRaNode n = new LoRaNode(dr);
             nodes.add(n);
             sim.addNode(n);
             canvas.randomlyPlaceNewNode(n);
         }
-        for (int i = 0; i < n_gateways; i++) {
+        for (int i = 0; i < SimConfig.getInstance().n_gateways; i++) {
             LoRaGateway g = new LoRaGateway();
             gateways.add(g);
             sim.addGateway(g);
@@ -121,12 +120,9 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         String cmd = ae.getActionCommand();
         
         switch (cmd) {
-            case "Configure Simulation":
-                sim_config.setVisible(true);
-                break;
-            case "conf-sim-ok":
+            case "Run Simulation":
                 canvas.clearAll();
-                _createSimulation(sim_config.getNumOfNodes(), sim_config.getNumOfGateways());
+                _createSimulation();
                 canvas.repaint();
                 break;
             default:

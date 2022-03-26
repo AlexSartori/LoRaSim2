@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import lorasim2.LoRaGateway;
 import lorasim2.LoRaMarkovModel;
 import lorasim2.LoRaNode;
+import lorasim2.SimConfig;
 import lorasim2.Simulator;
 
 /**
@@ -26,7 +27,6 @@ import lorasim2.Simulator;
  */
 public class CanvasPanel extends JPanel {
     private final Simulator simulator;
-    private final SimConfigDialog config_dialog;
     private final int NODE_IMG_SIZE = 70;
     private final Random rng = new Random();
     
@@ -35,10 +35,9 @@ public class CanvasPanel extends JPanel {
     private final HashMap<LoRaNode, Point> gui_nodes;
     private final HashMap<LoRaGateway, Point> gui_gateways;
     
-    public CanvasPanel(Simulator sim, SimConfigDialog conf) {
+    public CanvasPanel(Simulator sim) {
         super();
         this.simulator = sim;
-        this.config_dialog = conf;
         this.gui_nodes = new HashMap<>();
         this.gui_gateways = new HashMap<>();
         
@@ -194,6 +193,7 @@ public class CanvasPanel extends JPanel {
     }
     
     public float calcDistance(LoRaNode n1, LoRaNode n2) {
+        float scale = SimConfig.getInstance().max_node_distance_m / this.getWidth();
         Point p1 = n1 instanceof LoRaGateway ? gui_gateways.get(n1) : gui_nodes.get(n1),
               p2 = n2 instanceof LoRaGateway ? gui_gateways.get(n2) : gui_nodes.get(n2);
         
@@ -203,7 +203,7 @@ public class CanvasPanel extends JPanel {
             ) + Math.pow(
                 (float)p1.getY() - p2.getY(), 2
             )
-        ) * config_dialog.getGuiScale();
+        ) * scale;
     }
     
     /*private LoRaNode getClosestNodeToPoint(Point p) {
