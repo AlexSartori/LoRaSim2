@@ -55,6 +55,7 @@ public class Simulator {
     private final Random RNG;
     
     public Simulator() {
+        config = SimConfig.getInstance();
         stats = new SimulationStats();
         nodes = new ArrayList<>();
         gateways = new ArrayList<>();
@@ -85,7 +86,6 @@ public class Simulator {
         link_models.clear();
         events_queue.clear();
         open_transmissions.clear();
-        config = null;
     }
     
     public void addNode(LoRaNode node) {
@@ -111,9 +111,7 @@ public class Simulator {
         return link_models.get(link);
     }
     
-    public SimulationStats runSimulation(SimConfig conf) {
-        this.config = conf;
-        
+    public SimulationStats runSimulation() {        
         events_queue.add(new SimulationEvent(null, 0, EventType.SIMULATION_START));
         events_queue.add(new SimulationEvent(null, config.sim_duration_ms, EventType.SIMULATION_END));
         

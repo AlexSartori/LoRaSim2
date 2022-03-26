@@ -14,7 +14,6 @@ import lorasim2.LoRaGateway;
 import lorasim2.LoRaMarkovModel;
 import lorasim2.LoRaModelFactory;
 import lorasim2.LoRaNode;
-import lorasim2.SimConfig;
 import lorasim2.SimulationStats;
 import lorasim2.Simulator;
 
@@ -61,11 +60,6 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         ArrayList<LoRaNode> nodes = new ArrayList<>();
         ArrayList<LoRaGateway> gateways = new ArrayList<>();
         Random rng = new Random();
-        SimConfig sim_conf = new SimConfig(
-            sim_config.getSimDuration(),
-            sim_config.getMaxTXDelay(),
-            sim_config.getPayloadSize()
-        );
         sim.resetSimulation();
         
         for (int i = 0; i < n_nodes; i++) {
@@ -114,7 +108,7 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
             });
         });
         
-        SimulationStats res = sim.runSimulation(sim_conf);
+        SimulationStats res = sim.runSimulation();
         
         System.out.println("[Main]: Preparing results...");
         res_window = new ResultsWindow();
