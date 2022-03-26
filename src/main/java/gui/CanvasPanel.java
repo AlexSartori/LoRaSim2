@@ -28,7 +28,6 @@ import lorasim2.Simulator;
 public class CanvasPanel extends JPanel {
     private final Simulator simulator;
     private final int NODE_IMG_SIZE = 70;
-    private final Random rng = new Random();
     
     private BufferedImage img_lora_node, img_lora_gateway;
 
@@ -169,26 +168,6 @@ public class CanvasPanel extends JPanel {
     public void clearAll() {
         gui_nodes.clear();
         gui_gateways.clear();
-        this.repaint();
-    }
-    
-    public void randomlyPlaceNewNode(LoRaNode n) {
-        Point p = new Point(
-            NODE_IMG_SIZE + rng.nextInt(this.getWidth() - NODE_IMG_SIZE*2),
-            NODE_IMG_SIZE + rng.nextInt(this.getHeight() - NODE_IMG_SIZE*2)
-        );
-        gui_nodes.put(n, p);
-        
-        this.repaint();
-    }
-    
-    public void randomlyPlaceNewGateway(LoRaGateway g) {
-        Point p = new Point(
-            NODE_IMG_SIZE + rng.nextInt(this.getWidth() - NODE_IMG_SIZE*2),
-            NODE_IMG_SIZE + rng.nextInt(this.getHeight() - NODE_IMG_SIZE*2)
-        );
-        gui_gateways.put(g, p);
-        
         this.repaint();
     }
     

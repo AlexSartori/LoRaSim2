@@ -1,5 +1,6 @@
 package lorasim2;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -49,6 +50,7 @@ public class Simulator {
     private float time_ms;
     private final ArrayList<LoRaNode> nodes;
     private final ArrayList<LoRaGateway> gateways;
+    private final HashMap<LoRaNode, Point> node_locations;
     private final HashMap<LoRaLink, LoRaMarkovModel> link_models;
     private final PriorityQueue<SimulationEvent> events_queue;
     private final HashMap<LoRaNode, Float> open_transmissions;
@@ -59,11 +61,14 @@ public class Simulator {
         stats = new SimulationStats();
         nodes = new ArrayList<>();
         gateways = new ArrayList<>();
+        node_locations = new HashMap<>();
         link_models = new HashMap<>();
         events_queue = new PriorityQueue<>(SimulationEvent.getComparator());
         open_transmissions = new HashMap<>();
         RNG = new Random();
-        resetSimulation();
+        
+        
+        _createNodes();
     }
     
     private void _simLog(String msg) {
@@ -71,39 +76,58 @@ public class Simulator {
     }
     
     public ArrayList<LoRaNode> getNodes() {
-        return (ArrayList<LoRaNode>)nodes.clone();
+        return nodes;
     }
     
     public ArrayList<LoRaGateway> getGateway() {
-        return (ArrayList<LoRaGateway>)gateways.clone();
+        return gateways;
     }
     
-    public void resetSimulation() {
-        time_ms = 0;
-        stats = new SimulationStats();
-        nodes.clear();
-        gateways.clear();
-        link_models.clear();
-        events_queue.clear();
-        open_transmissions.clear();
+    private void _createNodes() {
+        for (int i = 0; i < config.n_nodes; i++) {
+            int dr = RNG.nextInt(4) * 2;
+            LoRaNode n = new LoRaNode(dr);
+            Point location = _getRandomPoint();
+            
+            nodes.add(n);
+            node_locations.put(n, location);
+        }
+        
+        for (int i = 0; i < config.n_gateways; i++) {
+            LoRaGateway g = new LoRaGateway();
+            Point location = _getRandomPoint();
+            
+            gateways.add(g);
+            node_locations.put(g, location);
+            
+            nodes.forEach(n -> {
+                float distance = (float)location.distance(node_locations.get(n));
+                LoRaMarkovModel model = LoRaModelFactory.getLinkModel(g, n, distance, 0);
+                
+                if (model != null) {
+                    _setLinkModel(g, n, model);
+                    _setLinkModel(n, g, model);
+                }
+                else
+                    _simLog("Warning: no model found for nodes: " + g.id + " --> " + n.id);
+            });
+        }
     }
     
-    public void addNode(LoRaNode node) {
-        nodes.add(node);
+    private Point _getRandomPoint() {
+        return new Point(
+            RNG.nextInt(config.max_node_distance_m),
+            RNG.nextInt(config.max_node_distance_m)
+        );
     }
     
-    public void addGateway(LoRaGateway gw) {
-        gateways.add(gw);
-    }
-    
-    public void setLinkModel(LoRaNode n1, LoRaNode n2, LoRaMarkovModel m) throws Exception {
+    private void _setLinkModel(LoRaNode n1, LoRaNode n2, LoRaMarkovModel m) {
         if (!nodes.contains(n1) && !gateways.contains(n1))
-            throw new Exception("Unknown node: " + n1.id);
+            _simLog("Error@setLinkModel: Unknown node: " + n1.id);
         if (!nodes.contains(n2) && !gateways.contains(n2))
-            throw new Exception("Unknown node: " + n2.id);
+            _simLog("Error@setLinkModel: Unknown node: " + n2.id);
         
         link_models.put(new LoRaLink(n1, n2), m);
-        _simLog("Added link " + n1.id + " <--> " + n2.id);
     }
     
     public LoRaMarkovModel getLinkModel(LoRaNode n1, LoRaNode n2) {

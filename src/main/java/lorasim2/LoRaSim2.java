@@ -11,14 +11,13 @@ public class LoRaSim2 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        Simulator sim = new Simulator();
+        
         if (SimConfig.getInstance().headless) {
-            SimulationStats res;
-            
-            Simulator sim = new Simulator();
-            res = sim.runSimulation();
+            SimulationStats res = sim.runSimulation();
             res.getTransmissions();
         } else {
-            MainWindow win = new MainWindow();
+            MainWindow win = new MainWindow(sim);
             win.setVisible(true);
         }
     }

@@ -27,9 +27,9 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
     private CanvasPanel canvas;
     private ResultsWindow res_window;
     
-    public MainWindow() {
+    public MainWindow(Simulator s) {
         super();
-        sim = new Simulator();
+        this.sim = s;
         this.initUI();
     }
     
@@ -56,63 +56,11 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
     }
     
     private void _createSimulation() {
-        ArrayList<LoRaNode> nodes = new ArrayList<>();
-        ArrayList<LoRaGateway> gateways = new ArrayList<>();
-        Random rng = new Random();
-        sim.resetSimulation();
-        
-        for (int i = 0; i < SimConfig.getInstance().n_nodes; i++) {
-            int dr = rng.nextInt(4) * 2;
-            LoRaNode n = new LoRaNode(dr);
-            nodes.add(n);
-            sim.addNode(n);
-            canvas.randomlyPlaceNewNode(n);
-        }
-        for (int i = 0; i < SimConfig.getInstance().n_gateways; i++) {
-            LoRaGateway g = new LoRaGateway();
-            gateways.add(g);
-            sim.addGateway(g);
-            canvas.randomlyPlaceNewGateway(g);
-        }
-        
-        gateways.forEach(gw -> {
-            nodes.forEach(n -> {
-                try {
-                    LoRaMarkovModel model = LoRaModelFactory.getLinkModel(gw, n, canvas.calcDistance(gw, n), 0);
-                    if (model != null)
-                        sim.setLinkModel(gw, n, model);
-                    else
-                        System.out.println("[Main]: Warning: no model found for nodes: " + gw.id + " --> " + n.id);
-                } catch (Exception e) {
-                    System.err.println("[Main]: Failed to set model for link: " + gw.id + " <--> " + n.id);
-                    e.printStackTrace();
-                }
-            });
-        });
-        
-        nodes.forEach(n1 -> {
-            nodes.forEach(n2 ->{
-                if (n1 == n2)
-                    return;
-                
-                try {
-                    LoRaMarkovModel model = LoRaModelFactory.getLinkModel(n1, n2, canvas.calcDistance(n1, n2), 0);
-                    if (model != null)
-                        sim.setLinkModel(n1, n2, model);
-                    else
-                        System.out.println("[Main]: Warning: no model found for nodes: " + n1.id + " --> " + n2.id);
-                } catch (Exception e) {
-                    System.err.println("[Main]: Failed to set model for link: " + n1.id + " <--> " + n2.id);
-                }
-            });
-        });
-        
         SimulationStats res = sim.runSimulation();
         
         System.out.println("[Main]: Preparing results...");
         res_window = new ResultsWindow();
         res_window.showResults(res);
-        System.out.println("    > Done");
     }
 
     @Override
