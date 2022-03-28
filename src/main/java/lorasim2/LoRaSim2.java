@@ -19,6 +19,7 @@ public class LoRaSim2 {
         } else {
             MainWindow win = new MainWindow(sim);
             win.setVisible(true);
+            win.repaint();
         }
     }
     

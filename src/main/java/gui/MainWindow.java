@@ -69,7 +69,6 @@ public class MainWindow extends javax.swing.JFrame implements ActionListener {
         
         switch (cmd) {
             case "Run Simulation":
-                canvas.clearAll();
                 _createSimulation();
                 canvas.repaint();
                 break;

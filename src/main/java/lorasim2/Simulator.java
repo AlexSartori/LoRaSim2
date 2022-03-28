@@ -79,8 +79,12 @@ public class Simulator {
         return nodes;
     }
     
-    public ArrayList<LoRaGateway> getGateway() {
+    public ArrayList<LoRaGateway> getGateways() {
         return gateways;
+    }
+    
+    public Point getNodeLocation(LoRaNode n) {
+        return node_locations.get(n);
     }
     
     private void _createNodes() {

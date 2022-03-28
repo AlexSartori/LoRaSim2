@@ -22,6 +22,8 @@ public class LoRaNode {
     
     @Override
     public boolean equals(Object n) {
+        if (n.getClass() != LoRaNode.class)
+            return false;
         return id == ((LoRaNode)n).id;
     }
 }
