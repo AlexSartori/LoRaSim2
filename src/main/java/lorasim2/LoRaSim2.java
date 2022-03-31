@@ -12,14 +12,19 @@ public class LoRaSim2 {
      */
     public static void main(String[] args) {
         Simulator sim = new Simulator();
+        SimConfig conf = SimConfig.getInstance();
+        SimulationStats res = null;
         
-        if (SimConfig.getInstance().headless) {
-            SimulationStats res = sim.runSimulation();
-            res.getTransmissions();
+        if (conf.headless) {
+            res = sim.runSimulation();
         } else {
             MainWindow win = new MainWindow(sim);
             win.setVisible(true);
             win.repaint();
+        }
+        
+        if (conf.throughput_csv) {
+            new CsvExporter(res).exportThroughput("node_{id}_throughput.csv");
         }
     }
     

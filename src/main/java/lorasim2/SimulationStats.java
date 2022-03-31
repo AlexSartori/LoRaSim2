@@ -50,14 +50,11 @@ public class SimulationStats {
             }
         }
         
-        System.out.println("RX to node #" + n.id + " overlaps with " + packets.size() + " other packets");
-        
         float max_overlap = 0;
         for (float s : packets.values())
             if (s > max_overlap)
                 max_overlap = s;
         
-        System.out.println("   -> Max overlap is " + (int)(max_overlap*100) + "%");
         return max_overlap;
     }
 }

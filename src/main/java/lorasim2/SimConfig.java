@@ -61,13 +61,13 @@ public class SimConfig {
             
             Section s_out = file.section("output");
             if (s_out.keyExists("throughput_png"))
-                this.throughput_png = Boolean.parseBoolean(s_env.value("throughput_png"));
+                this.throughput_png = Boolean.parseBoolean(s_out.value("throughput_png"));
             if (s_out.keyExists("throughput_csv"))
-                this.throughput_csv = Boolean.parseBoolean(s_env.value("throughput_csv"));
+                this.throughput_csv = Boolean.parseBoolean(s_out.value("throughput_csv"));
             if (s_out.keyExists("per_node_rx_png"))
-                this.per_node_rx_png = Boolean.parseBoolean(s_env.value("per_node_rx_png"));
+                this.per_node_rx_png = Boolean.parseBoolean(s_out.value("per_node_rx_png"));
             if (s_out.keyExists("per_ndoe_rx_csv"))
-                this.per_node_rx_csv = Boolean.parseBoolean(s_env.value("per_node_rx_csv"));
+                this.per_node_rx_csv = Boolean.parseBoolean(s_out.value("per_node_rx_csv"));
             
         } catch (IOException ex) {
             System.err.println("Simulator config file not found, using default values.");
