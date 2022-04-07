@@ -33,6 +33,9 @@ public class LoRaSim2 {
         if (conf.throughput_csv) {
             new CsvExporter(res).exportThroughput("node_{id}_throughput.csv");
         }
+        if (conf.per_node_rx_csv) {
+            new CsvExporter(res).exportReceptions("node_{id}_rx_data.csv");
+        }
     }
     
 }
