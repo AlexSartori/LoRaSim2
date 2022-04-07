@@ -1,12 +1,8 @@
 package lorasim2;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author alex
@@ -20,14 +16,14 @@ public class CsvExporter {
     
     /**
      * Export node receptions to show superpositions and success/failure
-     * @param fname_pattern Filename patter ("{id}" = node ID)
+     * @param fname_pattern Filename pattern ("{id}" = node ID)
      */
     public void exportReceptions(String fname_pattern) {
-        
-    }
+         
+   }
     
     /**
-     * Export node throughputs on the given CSV files.
+     * Export nodes throughput to the given CSV files.
      * @param fname_pattern Filename pattern ("{id}" = node ID)
      */
     public void exportThroughput(String fname_pattern) {

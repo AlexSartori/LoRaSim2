@@ -14,6 +14,7 @@ import lorasim2.Simulator;
  */
 public class MainWindow extends javax.swing.JFrame {
     private Simulator sim;
+    private SimulationStats sim_res;
     private JToolBar toolbar;
     private CanvasPanel canvas;
     private ResultsWindow res_window;
@@ -49,10 +50,19 @@ public class MainWindow extends javax.swing.JFrame {
     }
     
     private void _createSimulation() {
-        SimulationStats res = sim.runSimulation();
+        sim_res = sim.runSimulation();
+        
+        /* Unlock threads waiting for results */
+        synchronized(this) {
+            this.notifyAll();
+        }
         
         System.out.println("[Main]: Preparing results...");
         res_window = new ResultsWindow();
-        res_window.showResults(res);
+        res_window.showResults(sim_res);
+    }
+    
+    public SimulationStats getSimResult() {
+        return sim_res;
     }
 }

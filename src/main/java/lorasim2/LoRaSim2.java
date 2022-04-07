@@ -7,9 +7,6 @@ import gui.MainWindow;
  */
 public class LoRaSim2 {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         Simulator sim = new Simulator();
         SimConfig conf = SimConfig.getInstance();
@@ -21,6 +18,16 @@ public class LoRaSim2 {
             MainWindow win = new MainWindow(sim);
             win.setVisible(true);
             win.repaint();
+            
+            try {
+                synchronized(win) {
+                    win.wait();
+                }
+            } catch (InterruptedException ex) {
+                System.err.println("Concurrency error while waiting for simulator result set");
+            }
+            
+            System.out.println("Sim finished");
         }
         
         if (conf.throughput_csv) {
