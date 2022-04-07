@@ -27,7 +27,7 @@ public class LoRaSim2 {
                 System.err.println("Concurrency error while waiting for simulator result set");
             }
             
-            System.out.println("Sim finished");
+            res = win.getSimResult();
         }
         
         if (conf.throughput_csv) {
