@@ -21,8 +21,7 @@ public class LoRaModelFactory {
         
         try {
             ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-            File archive = new File(classLoader.getResource("models_v2.zip").toURI());
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(archive));
+            ZipInputStream zis = new ZipInputStream(classLoader.getResourceAsStream("models_v2.zip"));
             
             for (ZipEntry ze = zis.getNextEntry(); ze != null; ze = zis.getNextEntry()) {
                 // 'zis' is the input stream and will yield an 'EOF' before the next entry
@@ -45,8 +44,6 @@ public class LoRaModelFactory {
             }
         } catch (IOException ex) {
             System.err.println("[ModelFactory]: Error loading models: " + ex.getMessage());
-        } catch (URISyntaxException ex) {
-            System.err.println("[ModelFactory]: Couldn't find models archive: " + ex.getMessage());
         }
     }
     
