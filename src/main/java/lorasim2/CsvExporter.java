@@ -2,6 +2,7 @@ package lorasim2;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,7 +30,7 @@ public class CsvExporter {
                 
                 writer.write("src_node_id,start_time_ms,end_time_ms,payload_len,succeeded\n");
                 
-                packets.forEach((pkt) -> {
+                for (LoRaPacket pkt : packets)
                     writer.write(
                         String.valueOf(pkt.src.id) + ',' +
                         String.valueOf(pkt.start_ms) + ',' +
@@ -37,7 +38,6 @@ public class CsvExporter {
                         String.valueOf(pkt.payload_size) + ',' +
                         (pkt.successful ? '1' : '0') + '\n'
                     );
-                });
                 
                 writer.flush();
                 writer.close();
@@ -53,7 +53,7 @@ public class CsvExporter {
      * @param fname_pattern Filename pattern ("{id}" = node ID)
      */
     public void exportThroughput(String fname_pattern) {
-        HashMap<LoRaNode, HashMap<Float, Float>> thr_map = SimStatsUtils.getNodeThroughputs(dataset);
+        HashMap<LoRaNode, ArrayList<SimpleEntry<Float, Float>>> thr_map = SimStatsUtils.getNodeThroughputs(dataset);
         
         thr_map.forEach((src_node, thr_data) -> {
             try {
@@ -62,9 +62,8 @@ public class CsvExporter {
                 
                 writer.write("time_ms,thr_bps\n");
                 
-                thr_data.forEach((timestamp, thr) -> {
-                    writer.write(String.valueOf(timestamp) + ',' + String.valueOf(thr) + '\n');
-                });
+                for (SimpleEntry entry : thr_data)
+                    writer.write(String.valueOf(entry.getKey()) + ',' + String.valueOf(entry.getValue()) + '\n');
                 
                 writer.flush();
                 writer.close();
