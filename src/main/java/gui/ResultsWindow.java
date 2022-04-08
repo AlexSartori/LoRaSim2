@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import lorasim2.LoRaNode;
 import lorasim2.LoRaPacket;
+import lorasim2.SimStatsUtils;
 import lorasim2.SimulationStats;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
@@ -57,15 +58,7 @@ public class ResultsWindow extends JFrame {
     }
     
     public void showResults(SimulationStats r) {
-        HashMap<LoRaNode, ArrayList<LoRaPacket>> rx_data = new HashMap<>();
-
-        for (Entry<LoRaNode, ArrayList<LoRaPacket>> row : r.getTransmissions().entrySet()) {
-            for (LoRaPacket p : row.getValue()) {
-                if (!rx_data.containsKey(p.dst))
-                    rx_data.put(p.dst, new ArrayList<>());
-                rx_data.get(p.dst).add(p);
-            }
-        }
+        HashMap<LoRaNode, ArrayList<LoRaPacket>> rx_data = SimStatsUtils.getReceptionsByNode(r);
         
         for (Entry<LoRaNode, ArrayList<LoRaPacket>> row : rx_data.entrySet()) {
             XYChart c1 = createNodeReceptionsPlot(row.getKey(), row.getValue());
@@ -121,7 +114,8 @@ public class ResultsWindow extends JFrame {
         float y_min = -1, y_max = -1;
         
         for (LoRaPacket pkt : data) {
-            if (pkt.successful) bytes_transmitted += pkt.payload_size;
+            if (pkt.successful)
+                bytes_transmitted += pkt.payload_size;
             tot_time += pkt.end_ms - pkt.start_ms;
             float y = bytes_transmitted/tot_time*1000;
             x_vals.add(pkt.end_ms);
