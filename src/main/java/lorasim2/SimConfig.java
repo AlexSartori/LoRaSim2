@@ -11,9 +11,7 @@ public class SimConfig {
     private static SimConfig instance = null;
     
     public boolean headless,
-               throughput_png,
                throughput_csv,
-               per_node_rx_png,
                per_node_rx_csv;
     public int sim_duration_ms,
                max_node_distance_m,
@@ -32,9 +30,7 @@ public class SimConfig {
         this.n_nodes = 5;
         
         this.throughput_csv = true;
-        this.throughput_png = true;
         this.per_node_rx_csv = true;
-        this.per_node_rx_png = true;
         
         this._loadConfigFile();
     }
@@ -60,12 +56,8 @@ public class SimConfig {
                 this.payload_size = Integer.parseInt(s_nodes.value("payload_size"));
             
             Section s_out = file.section("output");
-            if (s_out.keyExists("throughput_png"))
-                this.throughput_png = Boolean.parseBoolean(s_out.value("throughput_png"));
             if (s_out.keyExists("throughput_csv"))
                 this.throughput_csv = Boolean.parseBoolean(s_out.value("throughput_csv"));
-            if (s_out.keyExists("per_node_rx_png"))
-                this.per_node_rx_png = Boolean.parseBoolean(s_out.value("per_node_rx_png"));
             if (s_out.keyExists("per_ndoe_rx_csv"))
                 this.per_node_rx_csv = Boolean.parseBoolean(s_out.value("per_node_rx_csv"));
             
