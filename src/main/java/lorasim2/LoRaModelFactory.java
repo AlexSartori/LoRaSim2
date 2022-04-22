@@ -2,10 +2,7 @@ package lorasim2;
 
 import eu.hgweb.jini.Ini;
 import eu.hgweb.jini.Section;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -96,8 +93,6 @@ public class LoRaModelFactory {
                 closest_model = m;
             }
         }
-        System.out.println("Returned model has interference delta = " + closest_interf_delta);
-        System.out.println("  Target interf: " + interf + "  /  Model interf: " + closest_model.interference_percent/100);
             
         return closest_model;
     }

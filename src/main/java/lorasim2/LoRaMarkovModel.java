@@ -22,6 +22,10 @@ public class LoRaMarkovModel {
         interference_percent = int_percent;
     }
     
+    public void setCurrentState(MarkovState s) {
+        current_state = s;
+    }
+    
     public MarkovState getCurrentState() {
         return current_state;
     }

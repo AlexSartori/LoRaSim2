@@ -33,11 +33,11 @@ public class LoRaSim2 {
         CsvExporter exporter = new CsvExporter(res);
         
         if (conf.throughput_csv)
-            exporter.exportThroughput("node_{id}_throughput.csv");
+            exporter.exportThroughput("sim_res/node_{id}_throughput.csv");
         if (conf.per_node_rx_csv)
-            exporter.exportReceptions("node_{id}_rx_data.csv");
+            exporter.exportReceptions("sim_res/node_{id}_rx_data.csv");
         if (conf.success_prob_csv)
-            exporter.exportSuccessProbs("node_{id}_succ_prob.csv");
+            exporter.exportSuccessProbs("sim_res/node_{id}_succ_prob.csv");
     }
     
 }

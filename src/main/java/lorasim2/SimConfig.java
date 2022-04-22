@@ -46,6 +46,8 @@ public class SimConfig {
                 this.headless = Boolean.parseBoolean(s_env.value("headless"));
             if (s_env.keyExists("sim_duration"))
                 this.sim_duration_ms = Integer.parseInt(s_env.value("sim_duration"));
+            if (s_env.keyExists("tx_max_delay"))
+                this.tx_max_delay = Integer.parseInt(s_env.value("tx_max_delay"));
             
             Section s_nodes = file.section("nodes");
             if (s_nodes.keyExists("num_nodes"))

@@ -108,10 +108,8 @@ public class Simulator {
                 float distance = (float)location.distance(node_locations.get(n));
                 LoRaMarkovModel model = LoRaModelFactory.getLinkModel(g, n, distance, 0);
                 
-                if (model != null) {
-                    _setLinkModel(g, n, model);
+                if (model != null)
                     _setLinkModel(n, g, model);
-                }
                 else
                     _simLog("Warning: no model found for nodes: " + g.id + " --> " + n.id);
             });
@@ -125,13 +123,13 @@ public class Simulator {
         );
     }
     
-    private void _setLinkModel(LoRaNode n1, LoRaNode n2, LoRaMarkovModel m) {
-        if (!nodes.contains(n1) && !gateways.contains(n1))
-            _simLog("Error@setLinkModel: Unknown node: " + n1.id);
-        if (!nodes.contains(n2) && !gateways.contains(n2))
-            _simLog("Error@setLinkModel: Unknown node: " + n2.id);
+    private void _setLinkModel(LoRaNode n, LoRaGateway gw, LoRaMarkovModel m) {
+        if (!nodes.contains(n))
+            _simLog("Error@setLinkModel: Unknown node: " + n.id);
+        if (!gateways.contains(gw))
+            _simLog("Error@setLinkModel: Unknown gateway: " + gw.id);
         
-        link_models.put(new LoRaLink(n1, n2), m);
+        link_models.put(new LoRaLink(n, gw), m);
     }
     
     public LoRaMarkovModel getLinkModel(LoRaNode n1, LoRaNode n2) {
@@ -157,8 +155,6 @@ public class Simulator {
                     events_queue.clear();
                     break;
                 case TX_START:
-                    _simLog("Beginning TX for node #" + curr_event.link.src.id);
-                    
                     open_transmissions.put(curr_event.link.src, time_ms);
                     for (LoRaLink l : link_models.keySet())
                         if (l.src == curr_event.link.src) {
@@ -167,8 +163,6 @@ public class Simulator {
                         }
                     break;
                 case TX_END:
-                    _simLog("Ended TX for link " + curr_event.link.src.id + " <-> " + curr_event.link.dst.id);
-                    
                     if (open_transmissions.remove(curr_event.link.src) != null)
                         // Only do this once for each TX_START (= many TX_ENDs)
                         _scheduleNextNodeTransmission(curr_event.link.src);
@@ -179,6 +173,8 @@ public class Simulator {
                     _scheduleNextNodeTransmission(curr_event.link.src);
                     break;
             }
+            
+            System.out.printf("Progress: %5.1f%%\r", time_ms*100/config.sim_duration_ms);
         }
         
         return stats;
@@ -204,11 +200,14 @@ public class Simulator {
     private void _endNodeTX(TXEndEvent e) {
         float interference = stats.getRXSuperposition(e.link.dst, e.tx_start_time, this.time_ms);
 
-        LoRaMarkovModel m_base = link_models.get(e.link);
-        LoRaMarkovModel m = LoRaModelFactory.getLinkModel(e.link.src, e.link.dst, m_base.distance_m, interference);
-        m.nextState(RNG);
+        /* Update link model based on interference */
+        LoRaMarkovModel m_prev = link_models.get(e.link);
+        LoRaMarkovModel m_new = LoRaModelFactory.getLinkModel(e.link.src, e.link.dst, m_prev.distance_m, interference);
+        link_models.put(e.link, m_new);
+        m_new.setCurrentState(m_prev.getCurrentState());
+        m_new.nextState(RNG);
         
-        stats.endTransmission(e.link, time_ms, m.getCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS, config.payload_size);
+        stats.endTransmission(e.link, time_ms, m_new.getCurrentState() == LoRaMarkovModel.MarkovState.SUCCESS, config.payload_size);
     }
     
     private float _getPacketAirtime(int DR) {
