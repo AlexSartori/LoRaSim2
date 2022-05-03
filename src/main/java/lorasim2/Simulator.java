@@ -88,30 +88,45 @@ public class Simulator {
     }
     
     private void _createNodes() {
-        for (int i = 0; i < config.n_nodes; i++) {
-            int dr = RNG.nextInt(4) * 2;
-            LoRaNode n = new LoRaNode(dr);
-            Point location = _getRandomPoint();
-            
-            nodes.add(n);
-            node_locations.put(n, location);
-        }
-        
+        /* Create gateways */
         for (int i = 0; i < config.n_gateways; i++) {
             LoRaGateway g = new LoRaGateway();
             Point location = _getRandomPoint();
-            
             gateways.add(g);
             node_locations.put(g, location);
+        }
+        
+        for (int i = 0; i < config.n_nodes; i++) {
+            /* Choose random point */
+            Point location = _getRandomPoint();
             
-            nodes.forEach(n -> {
-                float distance = (float)location.distance(node_locations.get(n));
-                LoRaMarkovModel model = LoRaModelFactory.getLinkModel(g, n, distance, 0);
+            /* Find highest DR that fits */
+            int highest_dr = -1;
+            for (LoRaGateway g : gateways) {
+                float dist = (float)location.distance(node_locations.get(g));
+                int tmp = LoRaModelFactory.getBestDR(dist, 0.5f);
+                if (tmp > highest_dr)
+                    highest_dr = tmp;
+            }
+            
+            /* Check if a suitable DR was found */
+            if (highest_dr == -1)
+                continue;
+            
+            /* Create and add the node */
+            LoRaNode n = new LoRaNode(highest_dr);
+            nodes.add(n);
+            node_locations.put(n, location);
+            
+            /* Connect it to the gateways */
+            gateways.forEach(g -> {
+                float distance = (float)location.distance(node_locations.get(g));
+                LoRaMarkovModel model = LoRaModelFactory.getLinkModel(n, g, distance, 0);
                 
                 if (model != null)
                     _setLinkModel(n, g, model);
                 else
-                    _simLog("Warning: no model found for nodes: " + g.id + " --> " + n.id);
+                    _simLog("Warning: no model found for nodes: " + n.id + " --> " + g.id);
             });
         }
     }

@@ -47,38 +47,22 @@ public class LoRaModelFactory {
     public static LoRaMarkovModel getLinkModel(LoRaNode n1, LoRaNode n2, float target_distance, float interf) {
         if (models == null) _loadModels();
         if (n1.DR != -1 && n2.DR != -1 && n1.DR != n2.DR) return null;
+                
+        /* Select only those models with the best matching distance --------- */
+        ArrayList<LoRaMarkovModel> candidates_by_dist = LoRaModelFactory.getModelsByDistance(target_distance);
+        
+        if (candidates_by_dist.size() == 0) {
+            System.err.println("[ModelFactory]: Warning: No candidates available for dist = " + target_distance);
+            return null;
+        }
         
         /* Gather all models for the correct Datarate ----------------------- */
         int DR = n1 instanceof LoRaGateway ? n2.DR : n1.DR;
         ArrayList<LoRaMarkovModel> candidates_by_DR = new ArrayList<>();
-        models.forEach(m -> { if (m.DR == DR) candidates_by_DR.add(m); });
+        candidates_by_dist.forEach(m -> { if (m.DR == DR) candidates_by_DR.add(m); });
         
         if (candidates_by_DR.size() == 0) {
             System.err.println("[ModelFactory]: Warning: No candidates available for DR = " + DR);
-            return null;
-        }
-        
-        /* Select only those models with the best matching distance --------- */
-        ArrayList<LoRaMarkovModel> candidates_by_dist = new ArrayList<>();
-        
-        for (LoRaMarkovModel m : candidates_by_DR) {
-            if (candidates_by_dist.isEmpty())
-                candidates_by_dist.add(m);
-            else if (m.distance_m == candidates_by_dist.get(0).distance_m)
-                candidates_by_dist.add(m);
-            else {
-                float old_delta = Math.abs(target_distance - candidates_by_dist.get(0).distance_m);
-                float new_delta = Math.abs(target_distance - m.distance_m);
-                
-                if (new_delta < old_delta) {
-                    candidates_by_dist.clear();
-                    candidates_by_dist.add(m);
-                }
-            }
-        }
-        
-        if (candidates_by_dist.size() == 0) {
-            System.err.println("[ModelFactory]: Warning: No candidates available for dist = " + target_distance);
             return null;
         }
         
@@ -86,7 +70,7 @@ public class LoRaModelFactory {
         float closest_interf_delta = -1;
         LoRaMarkovModel closest_model = null;
         
-        for (LoRaMarkovModel m : candidates_by_dist) {
+        for (LoRaMarkovModel m : candidates_by_DR) {
             float new_delta = Math.abs(interf - m.interference_percent/100);
             if (closest_interf_delta == -1 || new_delta < closest_interf_delta) {
                 closest_interf_delta = new_delta;
@@ -95,5 +79,48 @@ public class LoRaModelFactory {
         }
             
         return closest_model;
+    }
+    
+    public static int getBestDR(float dist, float min_succ_prob) {
+        if (models == null) _loadModels();
+        
+        ArrayList<LoRaMarkovModel> candidates = new ArrayList<>();
+        for (LoRaMarkovModel m : LoRaModelFactory.getModelsByDistance(dist)) {
+            // P(0) = [p(00) + p(10)] / [p(00) + p(01) + p(10) + p(11)] = [p(00) + p(10)]/2
+            float succ_prob = m.getProbMatrix()[0][0] + m.getProbMatrix()[1][0];
+            succ_prob /= 2;
+            
+            if (succ_prob >= min_succ_prob)
+                candidates.add(m);
+        }
+        
+        int highest_DR = -1;
+        for (LoRaMarkovModel m : candidates)
+            if (m.DR > highest_DR)
+                highest_DR = m.DR;
+        
+        return highest_DR;
+    }
+    
+    public static ArrayList<LoRaMarkovModel> getModelsByDistance(float dist_m) {
+        ArrayList<LoRaMarkovModel> res = new ArrayList<>();
+        
+        for (LoRaMarkovModel m : models) {
+            if (res.isEmpty())
+                res.add(m);
+            else if (m.distance_m == res.get(0).distance_m)
+                res.add(m);
+            else {
+                float old_delta = Math.abs(dist_m - res.get(0).distance_m);
+                float new_delta = Math.abs(dist_m - m.distance_m);
+                
+                if (new_delta < old_delta) {
+                    res.clear();
+                    res.add(m);
+                }
+            }
+        }
+        
+        return res;
     }
 }

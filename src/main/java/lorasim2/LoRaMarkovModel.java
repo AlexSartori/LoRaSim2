@@ -30,6 +30,10 @@ public class LoRaMarkovModel {
         return current_state;
     }
     
+    public float[][] getProbMatrix() {
+        return P.clone();
+    }
+    
     public MarkovState nextState(Random rng) {
         if (current_state == MarkovState.SUCCESS && rng.nextFloat() <= P[0][1])
             current_state = MarkovState.FAIL;
