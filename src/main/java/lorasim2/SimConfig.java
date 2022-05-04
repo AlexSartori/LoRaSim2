@@ -20,6 +20,9 @@ public class SimConfig {
                payload_size,
                n_gateways,
                n_nodes;
+    public String thr_out_fname,
+            node_rx_out_fname,
+            succ_p_out_fname;
     
     private SimConfig() {
         this.headless = false;
@@ -33,6 +36,10 @@ public class SimConfig {
         this.throughput_csv = true;
         this.per_node_rx_csv = true;
         this.success_prob_csv = true;
+        
+        this.thr_out_fname = "sim_res/node_{id}_throughput.csv";
+        this.node_rx_out_fname = "sim_res/node_{id}_rx_data.csv";
+        this.succ_p_out_fname = "sim_res/node_{id}_succ_prob.csv";
         
         this._loadConfigFile();
     }
@@ -62,7 +69,7 @@ public class SimConfig {
             Section s_out = file.section("output");
             if (s_out.keyExists("throughput_csv"))
                 this.throughput_csv = Boolean.parseBoolean(s_out.value("throughput_csv"));
-            if (s_out.keyExists("per_ndoe_rx_csv"))
+            if (s_out.keyExists("per_node_rx_csv"))
                 this.per_node_rx_csv = Boolean.parseBoolean(s_out.value("per_node_rx_csv"));
             if (s_out.keyExists("success_prob_csv"))
                 this.success_prob_csv = Boolean.parseBoolean(s_out.value("success_prob_csv"));
