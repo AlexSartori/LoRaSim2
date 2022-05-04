@@ -12,7 +12,7 @@ public class LoRaNode {
     public LoRaNode(int dr) {
         this.id = LoRaNode._global_id_counter++;
         this.DR = dr;
-        this.tx_prob = 0.6f;
+        this.tx_prob = SimConfig.getInstance().node_tx_prob;
     }
     
     @Override

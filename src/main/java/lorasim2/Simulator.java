@@ -152,7 +152,8 @@ public class Simulator {
         return link_models.get(link);
     }
     
-    public SimulationStats runSimulation() {        
+    public SimulationStats runSimulation() {
+        String progress_string = "";
         events_queue.add(new SimulationEvent(null, 0, EventType.SIMULATION_START));
         events_queue.add(new SimulationEvent(null, config.sim_duration_ms, EventType.SIMULATION_END));
         
@@ -189,7 +190,13 @@ public class Simulator {
                     break;
             }
             
-            System.out.printf("Progress: %5.1f%%\r", time_ms*100/config.sim_duration_ms);
+            /* Calculate progress but print it only if different from last time */
+            float progress = time_ms*100/config.sim_duration_ms;
+            String tmp = String.format("%5.1f%%", progress);
+            if (tmp != progress_string) {
+                progress_string = tmp;
+                System.out.printf("Progress: %5.1f%%\r", progress);
+            }
         }
         
         return stats;

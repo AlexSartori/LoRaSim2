@@ -20,6 +20,7 @@ public class SimConfig {
                payload_size,
                n_gateways,
                n_nodes;
+    public float node_tx_prob;
     public String thr_out_fname,
             node_rx_out_fname,
             succ_p_out_fname;
@@ -32,6 +33,8 @@ public class SimConfig {
         this.payload_size = 8;
         this.n_gateways = 1;
         this.n_nodes = 5;
+        
+        this.node_tx_prob = 0.6f;
         
         this.throughput_csv = true;
         this.per_node_rx_csv = true;
@@ -65,6 +68,8 @@ public class SimConfig {
                 this.max_node_distance_m = Integer.parseInt(s_nodes.value("max_distance"));
             if (s_nodes.keyExists("payload_size"))
                 this.payload_size = Integer.parseInt(s_nodes.value("payload_size"));
+            if (s_nodes.keyExists("node_tx_prob"))
+                this.node_tx_prob = Float.parseFloat(s_nodes.value("node_tx_prob"));
             
             Section s_out = file.section("output");
             if (s_out.keyExists("throughput_csv"))
