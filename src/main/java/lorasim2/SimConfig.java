@@ -13,7 +13,8 @@ public class SimConfig {
     public boolean headless;
     public String throughput_csv,
                per_node_rx_csv,
-               success_prob_csv;
+               success_prob_csv,
+               topology_csv;
     public int sim_duration_ms,
                max_node_distance_m,
                tx_max_delay,
@@ -36,6 +37,7 @@ public class SimConfig {
         this.throughput_csv = null;
         this.per_node_rx_csv = null;
         this.success_prob_csv = null;
+        this.topology_csv = null;
         
         this._loadConfigFile();
     }
@@ -71,6 +73,8 @@ public class SimConfig {
                 this.per_node_rx_csv = s_out.value("per_node_rx_csv");
             if (s_out.keyExists("success_prob_csv"))
                 this.success_prob_csv = s_out.value("success_prob_csv");
+            if (s_out.keyExists("topology_csv"))
+                this.topology_csv = s_out.value("topology_csv");
             
         } catch (IOException ex) {
             System.err.println("Simulator config file not found, using default values.");
