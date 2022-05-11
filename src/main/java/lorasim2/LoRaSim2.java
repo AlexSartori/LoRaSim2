@@ -38,8 +38,8 @@ public class LoRaSim2 {
         
         CsvExporter exporter = new CsvExporter(res);
         
-        if (conf.throughput_csv != null)
-            exporter.exportThroughput(conf.throughput_csv);
+        if (conf.per_node_thr_csv != null)
+            exporter.exportThroughput(conf.per_node_thr_csv);
         if (conf.per_node_rx_csv != null)
             exporter.exportReceptions(conf.per_node_rx_csv);
         if (conf.success_prob_csv != null)
@@ -51,7 +51,7 @@ public class LoRaSim2 {
                 .defaultHelp(true).description("Simulate LoRa networks");
         parser.addArgument("--num-nodes").help("Override number of nodes");
         parser.addArgument("--num-gateways").help("Override number of gateways");
-        parser.addArgument("--throughput-csv").help("Set the destination filename for the throughput data");
+        parser.addArgument("--final-thr-csv").help("Set the destination filename for the throughput data");
 
         Namespace ns = null;
         
@@ -70,7 +70,7 @@ public class LoRaSim2 {
         String n_gw = ns.getString("num_gateways");
         if (n_gw != null) conf.n_gateways = Integer.parseInt(n_gw);
         
-        String thr_fname = ns.getString("out_thr_fname");
-        if (thr_fname != null) conf.throughput_csv = thr_fname;
+        String thr_fname = ns.getString("final_thr_csv");
+        if (thr_fname != null) conf.final_thr_csv = thr_fname;
     }
 }

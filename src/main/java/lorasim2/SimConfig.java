@@ -11,7 +11,8 @@ public class SimConfig {
     private static SimConfig instance = null;
     
     public boolean headless;
-    public String throughput_csv,
+    public String per_node_thr_csv,
+               final_thr_csv,
                per_node_rx_csv,
                success_prob_csv,
                topology_csv;
@@ -34,7 +35,8 @@ public class SimConfig {
         
         this.node_tx_prob = 0.6f;
         
-        this.throughput_csv = null;
+        this.per_node_thr_csv = null;
+        this.final_thr_csv = null;
         this.per_node_rx_csv = null;
         this.success_prob_csv = null;
         this.topology_csv = null;
@@ -67,8 +69,10 @@ public class SimConfig {
                 this.node_tx_prob = Float.parseFloat(s_nodes.value("node_tx_prob"));
             
             Section s_out = file.section("output");
-            if (s_out.keyExists("throughput_csv"))
-                this.throughput_csv = s_out.value("throughput_csv");
+            if (s_out.keyExists("per_node_thr_csv"))
+                this.per_node_thr_csv = s_out.value("per_node_thr_csv");
+            if (s_out.keyExists("final_thr_csv"))
+                this.final_thr_csv = s_out.value("final_thr_csv");
             if (s_out.keyExists("per_node_rx_csv"))
                 this.per_node_rx_csv = s_out.value("per_node_rx_csv");
             if (s_out.keyExists("success_prob_csv"))
