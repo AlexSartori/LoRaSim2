@@ -52,7 +52,7 @@ public class CsvExporter {
      * Export nodes throughput to the given CSV files.
      * @param fname_pattern Filename pattern ("{id}" = node ID)
      */
-    public void exportThroughput(String fname_pattern) {
+    public void exportPerNodeThroughput(String fname_pattern) {
         HashMap<LoRaNode, ArrayList<SimpleEntry<Float, Float>>> thr_map = SimStatsUtils.getNodeThroughputs(dataset);
         
         thr_map.forEach((src_node, thr_data) -> {
@@ -72,6 +72,27 @@ public class CsvExporter {
                 ex.printStackTrace();
             }
         });
+    }
+    
+    public void exportFinalThroughput(String fname) {
+        HashMap<LoRaNode, ArrayList<SimpleEntry<Float, Float>>> thr_map = SimStatsUtils.getNodeThroughputs(dataset);
+        
+        try {
+            FileWriter writer = new FileWriter(fname);
+            writer.write("node_id,thr_bps\n");
+            
+            thr_map.forEach((src_node, thr_data) -> {
+                Float node_thr = thr_data.get(thr_data.size() - 1).getValue();
+                writer.write(String.valueOf(src_node.id) + ',' + String.valueOf(node_thr) + '\n');
+            });
+            
+            writer.flush();
+            writer.close();
+        } catch (IOException ex) {
+            System.err.println("[CSV-Exporter] Exception during export: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        
     }
     
     /**
