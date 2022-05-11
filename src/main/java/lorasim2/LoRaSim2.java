@@ -41,7 +41,7 @@ public class LoRaSim2 {
         if (conf.throughput_csv)
             exporter.exportThroughput(conf.thr_out_fname);
         if (conf.per_node_rx_csv)
-            exporter.exportReceptions(conf.node_rx_out_fname);
+            exporter.exportReceptions(conf.per_node_rx_out_fname);
         if (conf.success_prob_csv)
             exporter.exportSuccessProbs(conf.succ_p_out_fname);
     }

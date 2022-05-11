@@ -22,7 +22,7 @@ public class SimConfig {
                n_nodes;
     public float node_tx_prob;
     public String thr_out_fname,
-            node_rx_out_fname,
+            per_node_rx_out_fname,
             succ_p_out_fname;
     
     private SimConfig() {
@@ -41,7 +41,7 @@ public class SimConfig {
         this.success_prob_csv = true;
         
         this.thr_out_fname = "sim_res/node_{id}_throughput.csv";
-        this.node_rx_out_fname = "sim_res/node_{id}_rx_data.csv";
+        this.per_node_rx_out_fname = "sim_res/node_{id}_rx_data.csv";
         this.succ_p_out_fname = "sim_res/node_{id}_succ_prob.csv";
         
         this._loadConfigFile();
@@ -78,6 +78,12 @@ public class SimConfig {
                 this.per_node_rx_csv = Boolean.parseBoolean(s_out.value("per_node_rx_csv"));
             if (s_out.keyExists("success_prob_csv"))
                 this.success_prob_csv = Boolean.parseBoolean(s_out.value("success_prob_csv"));
+            if (s_out.keyExists("thr_out_fname"))
+                this.thr_out_fname = s_out.value("thr_out_fname");
+            if (s_out.keyExists("per_node_rx_out_fname"))
+                this.per_node_rx_out_fname = s_out.value("per_node_rx_out_fname");
+            if (s_out.keyExists("succ_p_out_fname"))
+                this.succ_p_out_fname = s_out.value("succ_p_out_fname");
             
         } catch (IOException ex) {
             System.err.println("Simulator config file not found, using default values.");
