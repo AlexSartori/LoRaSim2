@@ -83,6 +83,10 @@ public class Simulator {
         return gateways;
     }
     
+    public HashMap<LoRaNode, Point> getTopology() {
+        return node_locations;
+    }
+    
     public Point getNodeLocation(LoRaNode n) {
         return node_locations.get(n);
     }

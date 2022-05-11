@@ -1,5 +1,6 @@
 package lorasim2;
 
+import java.awt.Point;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
@@ -122,5 +123,23 @@ public class CsvExporter {
                 ex.printStackTrace();
             }
         });
+    }
+    
+    public void exportTopology(HashMap<LoRaNode, Point> topology, String fname) {
+        try {
+            FileWriter writer = new FileWriter(fname);
+            writer.write("node_id,node_type,x,y\n");
+            
+            topology.forEach((node, location) -> {
+                String type = node.getClass() == LoRaGateway.class ? "gateway" : "node";
+                writer.write(String.valueOf(node.id) + ',' + type + ',' + String.valueOf(location.x) + ',' + String.valueOf(location.y) + '\n');
+            });
+            
+            writer.flush();
+            writer.close();
+        } catch (IOException ex) {
+            System.err.println("[CSV-Exporter] Exception during export: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 }

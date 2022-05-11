@@ -44,6 +44,8 @@ public class LoRaSim2 {
             exporter.exportReceptions(conf.per_node_rx_csv);
         if (conf.success_prob_csv != null)
             exporter.exportSuccessProbs(conf.success_prob_csv);
+        if (conf.topology_csv != null)
+            exporter.exportTopology(sim.getTopology(), conf.topology_csv);
     }
     
     private static void overrideConfWithArgs(String[] argv) {
