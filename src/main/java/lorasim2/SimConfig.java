@@ -10,8 +10,8 @@ import java.io.IOException;
 public class SimConfig {
     private static SimConfig instance = null;
     
-    public boolean headless,
-               throughput_csv,
+    public boolean headless;
+    public String throughput_csv,
                per_node_rx_csv,
                success_prob_csv;
     public int sim_duration_ms,
@@ -21,9 +21,6 @@ public class SimConfig {
                n_gateways,
                n_nodes;
     public float node_tx_prob;
-    public String thr_out_fname,
-            per_node_rx_out_fname,
-            succ_p_out_fname;
     
     private SimConfig() {
         this.headless = false;
@@ -36,13 +33,9 @@ public class SimConfig {
         
         this.node_tx_prob = 0.6f;
         
-        this.throughput_csv = true;
-        this.per_node_rx_csv = true;
-        this.success_prob_csv = true;
-        
-        this.thr_out_fname = "sim_res/node_{id}_throughput.csv";
-        this.per_node_rx_out_fname = "sim_res/node_{id}_rx_data.csv";
-        this.succ_p_out_fname = "sim_res/node_{id}_succ_prob.csv";
+        this.throughput_csv = null;
+        this.per_node_rx_csv = null;
+        this.success_prob_csv = null;
         
         this._loadConfigFile();
     }
@@ -73,17 +66,11 @@ public class SimConfig {
             
             Section s_out = file.section("output");
             if (s_out.keyExists("throughput_csv"))
-                this.throughput_csv = Boolean.parseBoolean(s_out.value("throughput_csv"));
+                this.throughput_csv = s_out.value("throughput_csv");
             if (s_out.keyExists("per_node_rx_csv"))
-                this.per_node_rx_csv = Boolean.parseBoolean(s_out.value("per_node_rx_csv"));
+                this.per_node_rx_csv = s_out.value("per_node_rx_csv");
             if (s_out.keyExists("success_prob_csv"))
-                this.success_prob_csv = Boolean.parseBoolean(s_out.value("success_prob_csv"));
-            if (s_out.keyExists("thr_out_fname"))
-                this.thr_out_fname = s_out.value("thr_out_fname");
-            if (s_out.keyExists("per_node_rx_out_fname"))
-                this.per_node_rx_out_fname = s_out.value("per_node_rx_out_fname");
-            if (s_out.keyExists("succ_p_out_fname"))
-                this.succ_p_out_fname = s_out.value("succ_p_out_fname");
+                this.success_prob_csv = s_out.value("success_prob_csv");
             
         } catch (IOException ex) {
             System.err.println("Simulator config file not found, using default values.");

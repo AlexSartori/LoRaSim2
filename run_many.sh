@@ -11,7 +11,7 @@ do
 	for iteration in $(seq 1 $N)
 	do
 		echo -e "\n---------------- Iteration: $iteration"
-		java -jar LoRaSim2-1.0-jar-with-dependencies.jar --num-nodes $n --out-thr-fname "sim_res/$n/$iteration.n{id}.csv"
+		java -jar LoRaSim2-1.0-jar-with-dependencies.jar --num-nodes $n --throughput-csv "sim_res/$n/$iteration.n{id}.csv"
 	done
 done
 
