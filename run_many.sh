@@ -1,17 +1,19 @@
 #!/bin/bash
 
-N=20
-n_nodes=(10 100 300 700 1000 1500 2000)
+N=70
+n_nodes=(5 10 100 500 1000 2000)
+mkdir -p sim_res
 
 for n in "${n_nodes[@]}"
 do
-	echo -e "\n\n\n-------------------------------- N of nodes: $n"
-	mkdir -p sim_res/$n
+	echo -e "\n\n-------------------------------- N of nodes: $n"
+	echo "Launching $N parallel simulations..."
 
 	for iteration in $(seq 1 $N)
 	do
-		echo -e "\n---------------- Iteration: $iteration"
-		java -jar LoRaSim2-1.0-jar-with-dependencies.jar --num-nodes $n --throughput-csv "sim_res/$n/$iteration.n{id}.csv"
+		java -jar LoRaSim2-1.0-jar-with-dependencies.jar --num-nodes $n --final-thr-csv "sim_res/thr.$n.nodes.$iteration.csv" > /dev/null &
 	done
-done
 
+	echo "Done. Waiting for their termination..."
+	wait
+done

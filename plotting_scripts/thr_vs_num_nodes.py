@@ -1,27 +1,19 @@
 import os
 import matplotlib.pyplot as plt
 
-dists = ['10', '100', '500', '1000', '2000', '3000']
 datasets = {}
 
-for n_nodes in dists:
-    datasets[n_nodes] = []
+for file in os.listdir('sim_res/'):
+    _, n, _, it, _ = file.split('.')
+    n = int(n)
+    if n not in datasets:
+        datasets[n] = []
 
-    for file in os.listdir('datasets/n_' + n_nodes):
-        if 'rx_data' in file:
-            continue
+    for line in open('sim_res/' + file).readlines()[1:]:
+        datasets[n].append(float(line.split(',')[1]))
 
-        last_line = open('datasets/n_' + n_nodes + '/' + file).readlines()[-1]
-        datasets[n_nodes].append(float(last_line.split(',')[1]))
-
-
-# plt.hist(datasets.values(), density=True,
-#          label=[l + ' nodes' for l in datasets.keys()]
-#          )
-
-for d in dists:
-    k, v = zip(*datasets.items())
-    plt.boxplot(v, notch=False, sym='', labels=k)
+keys = sorted(datasets.keys())
+plt.boxplot([datasets[k] for k in keys], notch=False, sym='', labels=keys)
 
 # plt.legend()
 plt.tight_layout()
