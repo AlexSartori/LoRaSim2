@@ -16,7 +16,7 @@ keys = sorted(datasets.keys())
 plt.boxplot([datasets[k] for k in keys], notch=False, sym='', labels=keys)
 
 # plt.legend()
-plt.tight_layout()
+# plt.tight_layout()
 plt.title("Throughput distribution")
 plt.xlabel("Num. of nodes")
 plt.ylabel("Throughput (bps)")
