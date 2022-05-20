@@ -48,21 +48,21 @@ public class LoRaModelFactory {
         if (models == null) _loadModels();
         if (n1.DR != -1 && n2.DR != -1 && n1.DR != n2.DR) return null;
                 
-        /* Select only those models with the best matching distance --------- */
-        ArrayList<LoRaMarkovModel> candidates_by_dist = LoRaModelFactory.getModelsByDistance(target_distance);
-        
-        if (candidates_by_dist.size() == 0) {
-            System.err.println("[ModelFactory]: Warning: No candidates available for dist = " + target_distance);
-            return null;
-        }
-        
         /* Gather all models for the correct Datarate ----------------------- */
         int DR = n1 instanceof LoRaGateway ? n2.DR : n1.DR;
         ArrayList<LoRaMarkovModel> candidates_by_DR = new ArrayList<>();
-        candidates_by_dist.forEach(m -> { if (m.DR == DR) candidates_by_DR.add(m); });
+        models.forEach(m -> { if (m.DR == DR) candidates_by_DR.add(m); });
         
         if (candidates_by_DR.size() == 0) {
             System.err.println("[ModelFactory]: Warning: No candidates available for DR = " + DR);
+            return null;
+        }
+        
+        /* Select only those models with the best matching distance --------- */
+        ArrayList<LoRaMarkovModel> candidates_by_dist = LoRaModelFactory.filterModelsByDistance(target_distance, candidates_by_DR);
+        
+        if (candidates_by_dist.size() == 0) {
+            System.err.println("[ModelFactory]: Warning: No candidates available for dist = " + target_distance);
             return null;
         }
         
@@ -85,12 +85,10 @@ public class LoRaModelFactory {
         if (models == null) _loadModels();
         
         ArrayList<LoRaMarkovModel> candidates = new ArrayList<>();
-        for (LoRaMarkovModel m : LoRaModelFactory.getModelsByDistance(dist)) {
-            // P(0) = [p(00) + p(10)] / [p(00) + p(01) + p(10) + p(11)] = [p(00) + p(10)]/2
-            float succ_prob = m.getProbMatrix()[0][0] + m.getProbMatrix()[1][0];
-            succ_prob /= 2;
+        for (LoRaMarkovModel m : LoRaModelFactory.filterModelsByDistance(dist, models)) {
+            float pi_0 = m.getProbMatrix()[1][0] / (m.getProbMatrix()[0][1] + m.getProbMatrix()[1][0]);
             
-            if (succ_prob >= min_succ_prob)
+            if (pi_0 >= min_succ_prob)
                 candidates.add(m);
         }
         
@@ -102,10 +100,10 @@ public class LoRaModelFactory {
         return highest_DR;
     }
     
-    public static ArrayList<LoRaMarkovModel> getModelsByDistance(float dist_m) {
+    public static ArrayList<LoRaMarkovModel> filterModelsByDistance(float dist_m, ArrayList<LoRaMarkovModel> model_set) {
         ArrayList<LoRaMarkovModel> res = new ArrayList<>();
         
-        for (LoRaMarkovModel m : models) {
+        for (LoRaMarkovModel m : model_set) {
             if (res.isEmpty())
                 res.add(m);
             else if (m.distance_m == res.get(0).distance_m)

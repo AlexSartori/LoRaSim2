@@ -95,7 +95,7 @@ public class Simulator {
         /* Create gateways */
         for (int i = 0; i < config.n_gateways; i++) {
             LoRaGateway g = new LoRaGateway();
-            Point location = _getRandomPoint();
+            Point location = new Point(config.max_node_distance_m/2, config.max_node_distance_m/2); // _getRandomPoint();
             gateways.add(g);
             node_locations.put(g, location);
         }
@@ -108,7 +108,7 @@ public class Simulator {
             int highest_dr = -1;
             for (LoRaGateway g : gateways) {
                 float dist = (float)location.distance(node_locations.get(g));
-                int tmp = LoRaModelFactory.getBestDR(dist, 0.5f);
+                int tmp = LoRaModelFactory.getBestDR(dist, 0.3f);
                 if (tmp > highest_dr)
                     highest_dr = tmp;
             }
