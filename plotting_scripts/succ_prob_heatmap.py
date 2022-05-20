@@ -10,7 +10,7 @@ cmap = LinearSegmentedColormap.from_list('rg', ["r", "g"], N=50)
 
 topology = open("sim_res/topology.csv").readlines()[1:]
 succ_prob = open("sim_res/succ_prob.csv").readlines()[1:]
-mat = np.ones([mat_size, mat_size])
+mat = np.ones([mat_size+1, mat_size+1])
 
 topology_map = {}
 gateway_coords = []
@@ -37,12 +37,12 @@ for line in succ_prob:
 
 
 plt.imshow(mat, cmap=cmap, interpolation='gaussian', aspect='equal', origin='upper')
-plt.xticks(range(0, mat_size, int(mat_size/10)), range(0, max_size, int(max_size/10)))
-plt.yticks(range(0, mat_size, int(mat_size/10)), range(0, max_size, int(max_size/10)))
+plt.xticks(range(0, mat_size+1, int(mat_size/10)), range(0, max_size+1, int(max_size/10)))
+plt.yticks(range(0, mat_size+1, int(mat_size/10)), range(0, max_size+1, int(max_size/10)))
 plt.colorbar()
 
 for i, dr in enumerate(drs):
-    plt.scatter(scaled_x[i], scaled_y[i], marker='$'+str(dr)+'$', s=25, c='black', alpha=0.5, label='Node')
+    plt.scatter(scaled_x[i], scaled_y[i], marker='$'+str(dr)+'$', s=25, c='k', alpha=0.15*(dr+1), label='Node')
 
 plt.scatter([c[0]/max_size*mat_size for c in gateway_coords], [c[1]/max_size
                                                                * mat_size for c in gateway_coords], marker='^', s=50, c='yellow', label='Gateway')
@@ -52,4 +52,6 @@ plt.title("Success probability")
 plt.xlabel("X location (m)")
 plt.ylabel("Y location (m)")
 plt.tight_layout()
+plt.xlim([0, mat_size])
+plt.ylim([0, mat_size])
 plt.show()
