@@ -127,11 +127,18 @@ public class CsvExporter {
     public void exportTopology(HashMap<LoRaNode, Point> topology, String fname) {
         try {
             FileWriter writer = new FileWriter(fname);
-            writer.write("node_id,node_type,x,y\n");
+            writer.write("node_id,node_type,dr,x,y\n");
             
             topology.forEach((node, location) -> {
                 String type = node.getClass() == LoRaGateway.class ? "gateway" : "node";
-                writer.write(String.valueOf(node.id) + ',' + type + ',' + String.valueOf(location.x) + ',' + String.valueOf(location.y) + '\n');
+                writer.write(
+                    String.valueOf(node.id) + ',' +
+                    type + ',' +
+                    String.valueOf(node.DR) + ',' +
+                    String.valueOf(location.x) + ',' +
+                    String.valueOf(location.y) +
+                    '\n'
+                );
             });
             
             writer.flush();
