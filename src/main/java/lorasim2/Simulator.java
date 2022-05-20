@@ -114,8 +114,10 @@ public class Simulator {
             }
             
             /* Check if a suitable DR was found */
-            if (highest_dr == -1)
+            if (highest_dr == -1) {
+                i--;
                 continue;
+            }
             
             /* Create and add the node */
             LoRaNode n = new LoRaNode(highest_dr);
