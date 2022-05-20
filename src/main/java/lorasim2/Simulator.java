@@ -103,24 +103,30 @@ public class Simulator {
         for (int i = 0; i < config.n_nodes; i++) {
             /* Choose random point */
             Point location = _getRandomPoint();
+            int DR = config.fixed_dr;
             
-            /* Find highest DR that fits */
-            int highest_dr = -1;
-            for (LoRaGateway g : gateways) {
-                float dist = (float)location.distance(node_locations.get(g));
-                int tmp = LoRaModelFactory.getBestDR(dist, 0.3f);
-                if (tmp > highest_dr)
-                    highest_dr = tmp;
+            /* Find highest DR that fits if there's not a configured fixed one */
+            if (DR == -1) {
+                int highest_dr = -1;
+                
+                for (LoRaGateway g : gateways) {
+                    float dist = (float)location.distance(node_locations.get(g));
+                    int tmp = LoRaModelFactory.getBestDR(dist, 0.3f);
+                    if (tmp > highest_dr)
+                        highest_dr = tmp;
+                }
+                
+                DR = highest_dr;
             }
-            
+
             /* Check if a suitable DR was found */
-            if (highest_dr == -1) {
+            if (DR == -1) {
                 i--;
                 continue;
             }
             
             /* Create and add the node */
-            LoRaNode n = new LoRaNode(highest_dr);
+            LoRaNode n = new LoRaNode(DR);
             nodes.add(n);
             node_locations.put(n, location);
             

@@ -21,7 +21,8 @@ public class SimConfig {
                tx_max_delay,
                payload_size,
                n_gateways,
-               n_nodes;
+               n_nodes,
+               fixed_dr;
     public float node_tx_prob;
     
     private SimConfig() {
@@ -32,6 +33,7 @@ public class SimConfig {
         this.payload_size = 8;
         this.n_gateways = 1;
         this.n_nodes = 5;
+        this.fixed_dr = -1;
         
         this.node_tx_prob = 0.6f;
         
@@ -67,6 +69,8 @@ public class SimConfig {
                 this.payload_size = Integer.parseInt(s_nodes.value("payload_size"));
             if (s_nodes.keyExists("node_tx_prob"))
                 this.node_tx_prob = Float.parseFloat(s_nodes.value("node_tx_prob"));
+            if (s_nodes.keyExists("fixed_dr"))
+                this.fixed_dr = Integer.parseInt(s_nodes.value("fixed_dr"));
             
             Section s_out = file.section("output");
             if (s_out.keyExists("per_node_thr_csv"))
