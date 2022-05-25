@@ -6,7 +6,7 @@ from matplotlib.colors import LinearSegmentedColormap
 
 mat_size = 30
 max_size = 2000
-cmap = LinearSegmentedColormap.from_list('rg', ["r", "g"], N=50)
+cmap = LinearSegmentedColormap.from_list('rg', ["r", "orange", "g"], N=50)
 
 topology = open("sim_res/topology.csv").readlines()[1:]
 succ_prob = open("sim_res/succ_prob.csv").readlines()[1:]
@@ -42,7 +42,7 @@ plt.yticks(range(0, mat_size+1, int(mat_size/10)), range(0, max_size+1, int(max_
 plt.colorbar()
 
 for i, dr in enumerate(drs):
-    plt.scatter(scaled_x[i], scaled_y[i], marker='$'+str(dr)+'$', s=25, c='k', alpha=0.15*(dr+1), label='Node')
+    plt.scatter(scaled_x[i], scaled_y[i], marker='$'+str(dr)+'$', s=25, c='k', alpha=0.9, label='Node')
 
 plt.scatter([c[0]/max_size*mat_size for c in gateway_coords], [c[1]/max_size
                                                                * mat_size for c in gateway_coords], marker='^', s=50, c='yellow', label='Gateway')
