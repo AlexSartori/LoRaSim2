@@ -103,20 +103,35 @@ public class Simulator {
         for (int i = 0; i < config.n_nodes; i++) {
             /* Choose random point */
             Point location = _getRandomPoint();
-            int DR = config.fixed_dr;
+            int DR = -1;
             
-            /* Find highest DR that fits if there's not a configured fixed one */
-            if (DR == -1) {
+            if ("by_succ_prob".equals(config.dr_rule)) {
+                /* Find best permorming DR */
                 int highest_dr = -1;
                 
                 for (LoRaGateway g : gateways) {
                     float dist = (float)location.distance(node_locations.get(g));
-                    int tmp = LoRaModelFactory.getBestDR(dist, 0.3f);
+                    int tmp = LoRaModelFactory.chooseDRBySuccProb(dist, 0.3f);
                     if (tmp > highest_dr)
                         highest_dr = tmp;
                 }
                 
                 DR = highest_dr;
+            } else if ("by_distance".equals(config.dr_rule)) {
+                /* Select DR based on distance map */
+                int highest_dr = -1;
+                
+                for (LoRaGateway g : gateways) {
+                    float dist = (float)location.distance(node_locations.get(g));
+                    int tmp = LoRaModelFactory.chooseDRByDistance(dist);
+                    if (tmp > highest_dr)
+                        highest_dr = tmp;
+                }
+                
+                DR = highest_dr;
+            } else {
+                /* Otherwise the user specified a fixed DR */
+                DR = Integer.parseInt(config.dr_rule);
             }
 
             /* Check if a suitable DR was found */

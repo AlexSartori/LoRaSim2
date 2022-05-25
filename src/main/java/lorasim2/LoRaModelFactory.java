@@ -81,7 +81,7 @@ public class LoRaModelFactory {
         return closest_model;
     }
     
-    public static int getBestDR(float dist, float min_succ_prob) {
+    public static int chooseDRBySuccProb(float dist, float min_succ_prob) {
         if (models == null) _loadModels();
         
         ArrayList<LoRaMarkovModel> candidates = new ArrayList<>();
@@ -98,6 +98,18 @@ public class LoRaModelFactory {
                 highest_DR = m.DR;
         
         return highest_DR;
+    }
+    
+    public static int chooseDRByDistance(float dist) {
+        if (models == null) _loadModels();
+        
+        if (dist <= 500)
+            return 3;
+        if (dist <= 1000)
+            return 2;
+        if (dist <= 1500)
+            return 1;
+        return 0;
     }
     
     public static ArrayList<LoRaMarkovModel> filterModelsByDistance(float dist_m, ArrayList<LoRaMarkovModel> model_set) {
