@@ -18,24 +18,21 @@ public class SimConfig {
                topology_csv,
                dr_rule;
     public int sim_duration_ms,
+               pkts_per_hour,
                max_node_distance_m,
-               tx_max_delay,
                payload_size,
                n_gateways,
                n_nodes;
-    public float node_tx_prob;
     
     private SimConfig() {
         this.headless = false;
         this.sim_duration_ms = 1000;
         this.max_node_distance_m = 2000;
-        this.tx_max_delay = 200;
         this.payload_size = 8;
         this.n_gateways = 1;
         this.n_nodes = 5;
         this.dr_rule = null;
-        
-        this.node_tx_prob = 0.6f;
+        this.pkts_per_hour = 100;
         
         this.per_node_thr_csv = null;
         this.final_thr_csv = null;
@@ -55,8 +52,6 @@ public class SimConfig {
                 this.headless = Boolean.parseBoolean(s_env.value("headless"));
             if (s_env.keyExists("sim_duration"))
                 this.sim_duration_ms = Integer.parseInt(s_env.value("sim_duration"));
-            if (s_env.keyExists("tx_max_delay"))
-                this.tx_max_delay = Integer.parseInt(s_env.value("tx_max_delay"));
             
             Section s_nodes = file.section("nodes");
             if (s_nodes.keyExists("num_nodes"))
@@ -67,10 +62,10 @@ public class SimConfig {
                 this.max_node_distance_m = Integer.parseInt(s_nodes.value("max_distance"));
             if (s_nodes.keyExists("payload_size"))
                 this.payload_size = Integer.parseInt(s_nodes.value("payload_size"));
-            if (s_nodes.keyExists("node_tx_prob"))
-                this.node_tx_prob = Float.parseFloat(s_nodes.value("node_tx_prob"));
             if (s_nodes.keyExists("dr_rule"))
                 this.dr_rule = s_nodes.value("dr_rule");
+            if (s_nodes.keyExists("pkts_per_hour"))
+                this.pkts_per_hour = Integer.parseInt(s_nodes.value("pkts_per_hour"));
             
             Section s_out = file.section("output");
             if (s_out.keyExists("per_node_thr_csv"))

@@ -16,8 +16,7 @@ enum EventType {
     SIMULATION_END,
     TX_START,
     TX_END,
-    TX_END_FAIL,
-    NO_TX_END
+    TX_END_FAIL
 };
 
 class SimulationEvent {
@@ -212,9 +211,6 @@ public class Simulator {
                     
                     _endNodeTX((TXEndEvent)curr_event);
                     break;
-                case NO_TX_END:
-                    _scheduleNextNodeTransmission(curr_event.link.src);
-                    break;
             }
             
             /* Calculate progress but print it only if different from last time */
@@ -230,11 +226,13 @@ public class Simulator {
     }
     
     private void _scheduleNextNodeTransmission(LoRaNode n) {
-        float tx_time = this.time_ms + RNG.nextInt(config.tx_max_delay);
-        EventType et = (RNG.nextFloat() <= n.tx_prob) ? EventType.TX_START : EventType.NO_TX_END;
+        double rate_seconds = config.pkts_per_hour / 3600.0f;
+        double rnd_n = 1 - RNG.nextDouble();
+        double wait_time_seconds = -Math.log(rnd_n) / rate_seconds;
+        float tx_time = this.time_ms + (float)wait_time_seconds*1000;
         
         events_queue.add(
-            new SimulationEvent(new LoRaLink(n, null), tx_time, et)
+            new SimulationEvent(new LoRaLink(n, null), tx_time, EventType.TX_START)
         );
     }
     
