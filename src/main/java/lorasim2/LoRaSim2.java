@@ -56,7 +56,9 @@ public class LoRaSim2 {
         parser.addArgument("--num-nodes").help("Override number of nodes");
         parser.addArgument("--num-gateways").help("Override number of gateways");
         parser.addArgument("--final-thr-csv").help("Set the destination filename for the throughput data");
+        parser.addArgument("--tx-rate").help("Set transmission rate in packets per hour");
 
+        
         Namespace ns = null;
         
         try {
@@ -73,6 +75,9 @@ public class LoRaSim2 {
         
         String n_gw = ns.getString("num_gateways");
         if (n_gw != null) conf.n_gateways = Integer.parseInt(n_gw);
+        
+        String tx_rate = ns.getString("tx_rate");
+        if (tx_rate != null) conf.pkts_per_hour = Integer.parseInt(tx_rate);
         
         String thr_fname = ns.getString("final_thr_csv");
         if (thr_fname != null) conf.final_thr_csv = thr_fname;

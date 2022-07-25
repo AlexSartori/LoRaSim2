@@ -82,10 +82,14 @@ public class CsvExporter {
             FileWriter writer = new FileWriter(fname);
             writer.write("node_id,thr_bps\n");
             
-            thr_map.forEach((src_node, thr_data) -> {
-                Float node_thr = thr_data.get(thr_data.size() - 1).getValue();
-                writer.write(String.valueOf(src_node.id) + ',' + String.valueOf(node_thr) + '\n');
-            });
+                thr_map.forEach((src_node, thr_data) -> {
+                    Float node_thr = thr_data.get(thr_data.size() - 1).getValue();
+                    try {
+                        writer.write(String.valueOf(src_node.id) + ',' + String.valueOf(node_thr) + '\n');
+                    } catch (IOException ex) {
+                        System.err.println("Error writing output file: " + fname);
+                    }
+                });
             
             writer.flush();
             writer.close();
@@ -104,17 +108,21 @@ public class CsvExporter {
             FileWriter writer = new FileWriter(fname);
             writer.write("node_id,succ_prob\n");
 
-            dataset.getTransmissions().forEach((src_node, packets) -> {
-                int tries = 0,
-                    successes = 0;
-                
-                for (LoRaPacket pkt : packets) {
-                    tries++;
-                    successes += pkt.successful ? 1 : 0;
-                }
-                
-                writer.write(String.valueOf(src_node.id) + ',' + String.valueOf((float)successes/tries) + '\n');
-            });
+                dataset.getTransmissions().forEach((src_node, packets) -> {
+                    int tries = 0,
+                        successes = 0;
+
+                    for (LoRaPacket pkt : packets) {
+                        tries++;
+                        successes += pkt.successful ? 1 : 0;
+                    }
+
+                    try {
+                        writer.write(String.valueOf(src_node.id) + ',' + String.valueOf((float)successes/tries) + '\n');
+                    } catch (IOException ex) {
+                        System.err.println("Error writing output file: " + fname);
+                    }
+                });
             
             writer.flush();
             writer.close();
@@ -131,14 +139,18 @@ public class CsvExporter {
             
             topology.forEach((node, location) -> {
                 String type = node.getClass() == LoRaGateway.class ? "gateway" : "node";
-                writer.write(
-                    String.valueOf(node.id) + ',' +
-                    type + ',' +
-                    String.valueOf(node.DR) + ',' +
-                    String.valueOf(location.x) + ',' +
-                    String.valueOf(location.y) +
-                    '\n'
-                );
+                try {
+                    writer.write(
+                        String.valueOf(node.id) + ',' +
+                        type + ',' +
+                        String.valueOf(node.DR) + ',' +
+                        String.valueOf(location.x) + ',' +
+                        String.valueOf(location.y) +
+                        '\n'
+                    );
+                } catch (IOException ex) {
+                    System.err.println("Error writing file: " + fname);
+                }
             });
             
             writer.flush();
