@@ -50,8 +50,8 @@ public class SimConfig {
             Section s_env = file.section("environment");
             if (s_env.keyExists("headless"))
                 this.headless = Boolean.parseBoolean(s_env.value("headless"));
-            if (s_env.keyExists("sim_duration"))
-                this.sim_duration_ms = Integer.parseInt(s_env.value("sim_duration"));
+            if (s_env.keyExists("sim_duration_ms"))
+                this.sim_duration_ms = Integer.parseInt(s_env.value("sim_duration_ms"));
             
             Section s_nodes = file.section("nodes");
             if (s_nodes.keyExists("num_nodes"))

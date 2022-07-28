@@ -53,9 +53,11 @@ public class LoRaSim2 {
     private static void overrideConfWithArgs(String[] argv) {
         ArgumentParser parser = ArgumentParsers.newFor("LoRaSim2").build()
                 .defaultHelp(true).description("Simulate LoRa networks");
+        parser.addArgument("--sim-duration").help("Override the duration of the simulation");
         parser.addArgument("--num-nodes").help("Override number of nodes");
         parser.addArgument("--num-gateways").help("Override number of gateways");
         parser.addArgument("--final-thr-csv").help("Set the destination filename for the throughput data");
+        parser.addArgument("--psucc-csv").help("Set the destination filename for the success probability data");
         parser.addArgument("--tx-rate").help("Set transmission rate in packets per hour");
 
         
@@ -70,6 +72,9 @@ public class LoRaSim2 {
         
         SimConfig conf = SimConfig.getInstance();
         
+        String sim_ms = ns.getString("sim_suration");
+        if (sim_ms != null) conf.sim_duration_ms = Integer.parseInt(sim_ms);
+        
         String n_n = ns.getString("num_nodes");
         if (n_n != null) conf.n_nodes = Integer.parseInt(n_n);
         
@@ -81,5 +86,8 @@ public class LoRaSim2 {
         
         String thr_fname = ns.getString("final_thr_csv");
         if (thr_fname != null) conf.final_thr_csv = thr_fname;
+        
+        String psucc_fname = ns.getString("psucc_csv");
+        if (psucc_fname != null) conf.success_prob_csv = psucc_fname;
     }
 }
